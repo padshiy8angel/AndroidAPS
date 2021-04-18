@@ -32,7 +32,7 @@ public class Objective3 extends Objective {
 
     @Override
     protected void setupTasks(List<Task> tasks) {
-        tasks.add(new MinimumDurationTask(T.days(7).msecs()));
+        //tasks.add(new MinimumDurationTask(T.days(7).msecs()));
         tasks.add(new Task(R.string.objectives_manualenacts) {
             @Override
             public boolean isCompleted() {
