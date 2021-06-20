@@ -904,10 +904,10 @@ class SmsCommunicatorPlugin @Inject constructor(
                                         replyText += "\n" + activePlugin.activePump.shortStatus(true)
                                         lastRemoteBolusTime = DateUtil.now()
                                         if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
-                                            replyText = String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
+                                            replyText += "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
                                         } else {
                                             activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo, true)
-                                            replyText = String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
+                                            replyText += "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
                                         }
                                         if (isMeal) {
                                             profileFunction.getProfile()?.let { currentProfile ->
