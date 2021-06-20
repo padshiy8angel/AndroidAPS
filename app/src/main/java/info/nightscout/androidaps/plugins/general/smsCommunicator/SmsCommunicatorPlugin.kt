@@ -253,6 +253,12 @@ class SmsCommunicatorPlugin @Inject constructor(
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 || splitted.size == 3) processCARBS(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
+                "BOLUS_CARBS"      ->
+                    if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
+                    else if (splitted.size == 2 && DateUtil.now() - lastRemoteBolusTime < minDistance) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotebolusnotallowed)))
+                    else if (splitted.size == 2 && pump.isSuspended) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.pumpsuspended)))
+                    else if (splitted.size >= 3 || splitted.size <= 5) processBOLUS_CARBS(splitted, receivedSms)
+                    else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
                 "CAL"        ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2) processCAL(splitted, receivedSms)
@@ -837,6 +843,107 @@ class SmsCommunicatorPlugin @Inject constructor(
                         replyText += "\n" + activePlugin.activePump.shortStatus(true)
                         sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText))
                     }
+                }
+            })
+        }
+    }
+
+    /**
+     * Формат BOLUS_CARBS <BOLUS_VALUE*> <CARBS_VALUE*> <CARBS_TIME> <MEAL>
+     */
+    private fun processBOLUS_CARBS(splitted: Array<String>, receivedSms: Sms) {
+        var bolus = SafeParse.stringToDouble(splitted[1])
+        var carbs = SafeParse.stringToInt(splitted[2])
+        var carbsTime = DateUtil.now()
+        var isMeal = false;
+        if (splitted.size > 3) {
+            // Проверить, что 3 параметр - время (содержит :)
+            if (splitted[3].indexOf(":") > 0) {
+                carbsTime = DateUtil.toTodayTime(splitted[3].toUpperCase(Locale.getDefault()))
+                if (carbsTime == 0L) {
+                    sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
+                    return
+                }
+            } else {
+                isMeal = splitted[3].equals("MEAL", ignoreCase = true);
+            }
+            if (splitted.size == 4) {
+                isMeal = splitted[4].equals("MEAL", ignoreCase = true);
+            }
+        }
+        bolus = constraintChecker.applyBolusConstraints(Constraint(bolus)).value()
+        carbs = constraintChecker.applyCarbsConstraints(Constraint(carbs)).value()
+        if (carbs == 0 || bolus <= 0.0) {
+            sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
+        } else {
+            val passCode = generatePasscode()
+            val reply = if (isMeal)
+                String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsmealreplywithcode), bolus, carbs, carbsTime, passCode)
+            else
+                String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsreplywithcode), bolus, carbs, carbsTime, passCode)
+            receivedSms.processed = true
+            messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction(bolus, carbs, carbsTime) {
+                override fun run() {
+                    aapsLogger.debug("USER ENTRY: SMS BOLUS_CARBS $reply")
+                    val detailedBolusInfo = DetailedBolusInfo()
+                    detailedBolusInfo.insulin = aDouble()
+                    detailedBolusInfo.carbs = anInteger().toDouble()
+                    detailedBolusInfo.date = secondLong()
+                    detailedBolusInfo.source = Source.USER
+                    commandQueue.bolus(detailedBolusInfo, object : Callback() {
+                        override fun run() {
+                            val resultSuccess = result.success
+                            val resultBolusDelivered = result.bolusDelivered
+                            commandQueue.readStatus("SMS", object : Callback() {
+                                override fun run() {
+                                    if (resultSuccess) {
+                                        var replyText = if (isMeal)
+                                            String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered)
+                                        else
+                                            String.format(resourceHelper.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered)
+                                        replyText += "\n" + activePlugin.activePump.shortStatus(true)
+                                        lastRemoteBolusTime = DateUtil.now()
+                                        if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
+                                            replyText = String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
+                                        } else {
+                                            activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo, true)
+                                            replyText = String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
+                                        }
+                                        if (isMeal) {
+                                            profileFunction.getProfile()?.let { currentProfile ->
+                                                var eatingSoonTTDuration = sp.getInt(R.string.key_eatingsoon_duration, Constants.defaultEatingSoonTTDuration)
+                                                eatingSoonTTDuration =
+                                                    if (eatingSoonTTDuration > 0) eatingSoonTTDuration
+                                                    else Constants.defaultEatingSoonTTDuration
+                                                var eatingSoonTT = sp.getDouble(R.string.key_eatingsoon_target, if (currentProfile.units == Constants.MMOL) Constants.defaultEatingSoonTTmmol else Constants.defaultEatingSoonTTmgdl)
+                                                eatingSoonTT =
+                                                    if (eatingSoonTT > 0) eatingSoonTT
+                                                    else if (currentProfile.units == Constants.MMOL) Constants.defaultEatingSoonTTmmol
+                                                    else Constants.defaultEatingSoonTTmgdl
+                                                val tempTarget = TempTarget()
+                                                    .date(System.currentTimeMillis())
+                                                    .duration(eatingSoonTTDuration)
+                                                    .reason(resourceHelper.gs(R.string.eatingsoon))
+                                                    .source(Source.USER)
+                                                    .low(Profile.toMgdl(eatingSoonTT, currentProfile.units))
+                                                    .high(Profile.toMgdl(eatingSoonTT, currentProfile.units))
+                                                activePlugin.activeTreatments.addToHistoryTempTarget(tempTarget)
+                                                val tt = if (currentProfile.units == Constants.MMOL) {
+                                                    DecimalFormatter.to1Decimal(eatingSoonTT)
+                                                } else DecimalFormatter.to0Decimal(eatingSoonTT)
+                                                replyText += "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered_tt), tt, eatingSoonTTDuration)
+                                            }
+                                        }
+                                        sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText))
+                                    } else {
+                                        var replyText = resourceHelper.gs(R.string.smscommunicator_bolusfailed)
+                                        replyText += "\n" + activePlugin.activePump.shortStatus(true)
+                                        sendSMS(Sms(receivedSms.phoneNumber, replyText))
+                                    }
+                                }
+                            })
+                        }
+                    })
                 }
             })
         }

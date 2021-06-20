@@ -36,6 +36,12 @@ abstract class SmsAction : Runnable {
         this.secondLong = secondLong
     }
 
+    internal constructor(aDouble: Double, anInteger: Int, secondLong: Long) {
+        this.aDouble = aDouble
+        this.anInteger = anInteger
+        this.secondLong = secondLong
+    }
+
     fun aDouble(): Double {
         return aDouble?.let {
             aDouble
