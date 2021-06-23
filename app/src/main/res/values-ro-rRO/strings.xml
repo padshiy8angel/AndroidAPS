@@ -184,6 +184,8 @@
     <string name="smscommunicator_allowednumbers_summary">+ XXXXXXXXXX; + YYYYYYYYYY</string>
     <string name="smscommunicator_bolusreplywithcode">Pentru a livra un bolus de %1$.2fU răspundeți cu codul %2$s</string>
     <string name="smscommunicator_mealbolusreplywithcode">Pentru a livra un bolus de %1$.2fU raspundeți cu: %2$s</string>
+    <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
+    <string name="smscommunicator_boluscarbsmealreplywithcode">To deliver meal bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
     <string name="smscommunicator_temptargetwithcode">Pentru a seta tinta temporara %1$s raspundeti cu: %2$s</string>
     <string name="smscommunicator_temptargetcancel">Pentru a anula tinta temporara raspundeți cu: %1$s</string>
     <string name="smscommunicator_stopsmswithcode">Pentru a dezactiva serviciul SMS la distanta raspundeti cu: %1$s.\n\nRetineti ca o sa il puteti reactiva doar direct de pe smartphone-ul master AAPS.</string>

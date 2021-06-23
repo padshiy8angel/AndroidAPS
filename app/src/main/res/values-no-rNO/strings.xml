@@ -184,6 +184,8 @@
     <string name="smscommunicator_allowednumbers_summary">+XXXXXXXXXX;+YYYYYYYYYY</string>
     <string name="smscommunicator_bolusreplywithcode">For å levere bolus på %1$.2fE, svar med kode %2$s</string>
     <string name="smscommunicator_mealbolusreplywithcode">For å levere måltidsbolus på %1$.2fE, svar med kode %2$s</string>
+    <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
+    <string name="smscommunicator_boluscarbsmealreplywithcode">To deliver meal bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
     <string name="smscommunicator_temptargetwithcode">For å sette Temp Target på %1$s, svar med kode %2$s</string>
     <string name="smscommunicator_temptargetcancel">For å avbryte Temp Target, svar med kode %1$s</string>
     <string name="smscommunicator_stopsmswithcode">For å deaktivere fjernstyring via SMS meldinger, svar med kode %1$s.\n\nHusk at du vil kunne reaktivere den igjen kun fra AAPS master telefon.</string>

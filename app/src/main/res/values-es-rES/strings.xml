@@ -182,6 +182,8 @@
     <string name="smscommunicator_allowednumbers_summary">XXXXXXXXXX +; + YYYYYYYYYY</string>
     <string name="smscommunicator_bolusreplywithcode">Para entregar bolo %1$.2fU responder con código %2$s</string>
     <string name="smscommunicator_mealbolusreplywithcode">Para entregar bolo %1$.2fU responder con código %2$s</string>
+    <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
+    <string name="smscommunicator_boluscarbsmealreplywithcode">To deliver meal bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
     <string name="smscommunicator_temptargetwithcode">Para establecer un basal temporal %1$s responder con el código %2$s</string>
     <string name="smscommunicator_temptargetcancel">Para cancelar la basal temporal, responder con el código %1$s</string>
     <string name="smscommunicator_stopsmswithcode">Para inhabilitar la respuesta de servicio remoto de SMS, responder con el código %1$s.\n\nTenga en cuenta que solamente será capaz de reactivarlo directamente desde el móvil con la AAPS maestro.</string>

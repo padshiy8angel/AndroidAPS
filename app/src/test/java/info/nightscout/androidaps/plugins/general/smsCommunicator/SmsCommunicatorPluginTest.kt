@@ -181,6 +181,8 @@ class SmsCommunicatorPluginTest : TestBaseWithProfile() {
         `when`(resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)).thenReturn("Remote command is not allowed")
         `when`(resourceHelper.gs(R.string.smscommunicator_stopsmswithcode)).thenReturn("To disable the SMS Remote Service reply with code %1\$s.\\n\\nKeep in mind that you\\'ll able to reactivate it directly from the AAPS master smartphone only.")
         `when`(resourceHelper.gs(R.string.smscommunicator_mealbolusreplywithcode)).thenReturn("To deliver meal bolus %1$.2fU reply with code %2\$s.")
+        `when`(resourceHelper.gs(R.string.smscommunicator_boluscarbsreplywithcode)).thenReturn("To deliver bolus %1$.2fU and enter %2\$dg at %3\$s reply with code %4\$s.")
+        `when`(resourceHelper.gs(R.string.smscommunicator_boluscarbsmealreplywithcode)).thenReturn("To deliver meal bolus %1\$.2fU and enter %2\$dg at %3\$s reply with code %4\$s.")
         `when`(resourceHelper.gs(R.string.smscommunicator_temptargetwithcode)).thenReturn("To set the Temp Target %1\$s reply with code %2\$s")
         `when`(resourceHelper.gs(R.string.smscommunicator_temptargetcancel)).thenReturn("To cancel Temp Target reply with code %1\$s")
         `when`(resourceHelper.gs(R.string.smscommunicator_stoppedsms)).thenReturn("SMS Remote Service stopped. To reactivate it, use AAPS on master smartphone.")
@@ -190,7 +192,7 @@ class SmsCommunicatorPluginTest : TestBaseWithProfile() {
         `when`(resourceHelper.gs(R.string.smscommunicator_loopisdisabled)).thenReturn("Loop is disabled")
         `when`(resourceHelper.gs(R.string.smscommunicator_loopisenabled)).thenReturn("Loop is enabled")
         `when`(resourceHelper.gs(R.string.wrongformat)).thenReturn("Wrong format")
-        `when`(resourceHelper.gs(eq(R.string.wrongTbrDuration), any())).thenAnswer({ i: InvocationOnMock -> "TBR duration must be a multiple of " + i.getArguments()[1] + " minutes and greater than 0."})
+        `when`(resourceHelper.gs(eq(R.string.wrongTbrDuration), any())).thenAnswer({ i: InvocationOnMock -> "TBR duration must be a multiple of " + i.getArguments()[1] + " minutes and greater than 0." })
         `when`(resourceHelper.gs(R.string.smscommunicator_loophasbeendisabled)).thenReturn("Loop has been disabled")
         `when`(resourceHelper.gs(R.string.smscommunicator_loophasbeenenabled)).thenReturn("Loop has been enabled")
         `when`(resourceHelper.gs(R.string.smscommunicator_tempbasalcanceled)).thenReturn("Temp basal canceled")
@@ -289,6 +291,25 @@ class SmsCommunicatorPluginTest : TestBaseWithProfile() {
         Assert.assertTrue(smsCommunicatorPlugin.messages[1].text.contains("IOB:"))
         Assert.assertTrue(smsCommunicatorPlugin.messages[1].text.contains("Last BG: 100"))
         Assert.assertTrue(smsCommunicatorPlugin.messages[1].text.contains("COB: 10(2)g"))
+
+        //Bolus carbs
+        `when`(sp.getBoolean(R.string.key_smscommunicator_remotecommandsallowed, false)).thenReturn(true)
+        val smsTypes = listOf("BOLUS_CARBS 1.0 20",
+            "BOLUS_CARBS 1.0 20 11:45",
+            "BOLUS_CARBS 1.0 20 meal",
+            "BOLUS_CARBS 1.0 20 11:45 meal")
+        `when`(constraintChecker.applyBolusConstraints(anyObject())).thenReturn(Constraint<Double>(1.0))
+        `when`(constraintChecker.applyCarbsConstraints(anyObject())).thenReturn(Constraint<Int>(20))
+        smsTypes.forEach {
+            smsCommunicatorPlugin.messages = ArrayList()
+            sms = Sms("1234", it)
+            smsCommunicatorPlugin.processSms(sms)
+            Assert.assertTrue(smsCommunicatorPlugin.messages[1].text.contains("bolus 1.00U and enter 20g"))
+            val passCode: String = smsCommunicatorPlugin.messageToConfirm?.confirmCode!!
+            smsCommunicatorPlugin.processSms(Sms("1234", passCode))
+            Assert.assertEquals(passCode, smsCommunicatorPlugin.messages[2].text)
+            Assert.assertTrue(smsCommunicatorPlugin.messages[3].text.contains("Bolus 1.00U delivered successfully"))
+        }
 
         // LOOP : test remote control disabled
         `when`(sp.getBoolean(R.string.key_smscommunicator_remotecommandsallowed, false)).thenReturn(false)

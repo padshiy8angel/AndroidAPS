@@ -185,6 +185,8 @@ Eversense-appen.</string>
     <string name="smscommunicator_allowednumbers_summary">+4670XXXXXXX; +4670YYYYYYY</string>
     <string name="smscommunicator_bolusreplywithcode">För att ge bolus %1$.2f enheter, svara med kod %2$s</string>
     <string name="smscommunicator_mealbolusreplywithcode">För att ge bolus %1$.2f enheter, svara med kod: %2$s</string>
+    <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
+    <string name="smscommunicator_boluscarbsmealreplywithcode">To deliver meal bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
     <string name="smscommunicator_temptargetwithcode">För att sätta ett temporärt mål på %1$s svara med kod %2$s</string>
     <string name="smscommunicator_temptargetcancel">För att avbryta temporärt mål, svara med kod: %1$s</string>
     <string name="smscommunicator_stopsmswithcode">För att inaktivera fjärrkommandon via SMS, svara med kod: %1$s \n\nTänk på att måste ha tillgång till huvudtelefonen för att kunna återaktivera.</string>

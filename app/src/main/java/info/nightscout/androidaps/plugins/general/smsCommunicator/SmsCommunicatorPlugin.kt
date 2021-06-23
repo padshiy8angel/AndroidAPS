@@ -88,6 +88,7 @@ class SmsCommunicatorPlugin @Inject constructor(
         "PUMP" to "PUMP\nPUMP CONNECT\nPUMP DISCONNECT 30\n",
         "BASAL" to "BASAL STOP/CANCEL\nBASAL 0.3\nBASAL 0.3 20\nBASAL 30%\nBASAL 30% 20\n",
         "BOLUS" to "BOLUS 1.2\nBOLUS 1.2 MEAL",
+        "BOLUS_CARBS" to "BOLUS_CARBS 1.2 20\nBOLUS_CARBS 1.2 20 11:45\nBOLUS_CARBS 1.2 20 meal\nBOLUS_CARBS 1.2 20 11:45 meal",
         "EXTENDED" to "EXTENDED STOP/CANCEL\nEXTENDED 2 120",
         "CAL" to "CAL 5.6",
         "PROFILE" to "PROFILE STATUS/LIST\nPROFILE 1\nPROFILE 2 30",
@@ -867,7 +868,7 @@ class SmsCommunicatorPlugin @Inject constructor(
             } else {
                 isMeal = splitted[3].equals("MEAL", ignoreCase = true);
             }
-            if (splitted.size == 4) {
+            if (splitted.size > 4) {
                 isMeal = splitted[4].equals("MEAL", ignoreCase = true);
             }
         }
@@ -878,9 +879,9 @@ class SmsCommunicatorPlugin @Inject constructor(
         } else {
             val passCode = generatePasscode()
             val reply = if (isMeal)
-                String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsmealreplywithcode), bolus, carbs, carbsTime, passCode)
+                String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsmealreplywithcode), bolus, carbs, dateUtil.timeString(carbsTime), passCode)
             else
-                String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsreplywithcode), bolus, carbs, carbsTime, passCode)
+                String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsreplywithcode), bolus, carbs, dateUtil.timeString(carbsTime), passCode)
             receivedSms.processed = true
             messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction(bolus, carbs, carbsTime) {
                 override fun run() {
