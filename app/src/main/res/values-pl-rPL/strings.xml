@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">Tymczasowa baza %1$.2fU/h przez %2$d min rozpoczęta</string>
     <string name="smscommunicator_extendedset">Bolus przedłużony %1$.2fU na %2$d min. rozpoczęty pomyślnie</string>
     <string name="smscommunicator_carbsset">Pomyślnie wprowadzono %1$d g węglowodanów</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Próba wprowadzenia %1$dg węglowodanów nie powiodła się</string>
     <string name="smscommunicator_tempbasalset_percent">Tymczasowa baza %1$d%% przez %2$d min. pomyślnie rozpoczęta</string>
     <string name="smscommunicator_tempbasalfailed">Rozpoczęcie tymczasowej bazy nie powiodło się</string>

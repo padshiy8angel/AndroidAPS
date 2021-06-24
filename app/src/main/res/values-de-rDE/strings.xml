@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">TBR mit %1$.2f IE/h für %2$d min wurde erfolgreich gestartet.</string>
     <string name="smscommunicator_extendedset">Der erweiterte Bolus %1$.2f IE/h für %2$d Minuten wurde erfolgreich gestartet</string>
     <string name="smscommunicator_carbsset">%1$d g Kohlenhydrate erfolgreich erfasst</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Eingabe von %1$d g Kohlenhydraten ist fehlgeschlagen.</string>
     <string name="smscommunicator_tempbasalset_percent">Die temporäre Basalrate wurde erfolgreich für %2$d Minuten auf %1$d%% gesetzt.</string>
     <string name="smscommunicator_tempbasalfailed">Das Starten der TBR ist fehlgeschlagen.</string>

@@ -42,6 +42,7 @@ import io.reactivex.schedulers.Schedulers
 import org.apache.commons.lang3.StringUtils
 import java.text.Normalizer
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -857,10 +858,12 @@ class SmsCommunicatorPlugin @Inject constructor(
         var carbs = SafeParse.stringToInt(splitted[2])
         var carbsTime = DateUtil.now()
         var isMeal = false;
+        val isCarbsAnotherTime = AtomicBoolean(false)
         if (splitted.size > 3) {
             // Проверить, что 3 параметр - время (содержит :)
             if (splitted[3].indexOf(":") > 0) {
                 carbsTime = DateUtil.toTodayTime(splitted[3].toUpperCase(Locale.getDefault()))
+                isCarbsAnotherTime.set(true)
                 if (carbsTime == 0L) {
                     sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
                     return
@@ -888,9 +891,12 @@ class SmsCommunicatorPlugin @Inject constructor(
                     aapsLogger.debug("USER ENTRY: SMS BOLUS_CARBS $reply")
                     val detailedBolusInfo = DetailedBolusInfo()
                     detailedBolusInfo.insulin = aDouble()
-                    detailedBolusInfo.carbs = anInteger().toDouble()
-                    detailedBolusInfo.date = secondLong()
+                    if (!isCarbsAnotherTime.get()) {
+                        detailedBolusInfo.carbs = anInteger().toDouble()
+                        detailedBolusInfo.date = secondLong()
+                    }
                     detailedBolusInfo.source = Source.USER
+                    val replyText = StringBuilder()
                     commandQueue.bolus(detailedBolusInfo, object : Callback() {
                         override fun run() {
                             val resultSuccess = result.success
@@ -898,17 +904,19 @@ class SmsCommunicatorPlugin @Inject constructor(
                             commandQueue.readStatus("SMS", object : Callback() {
                                 override fun run() {
                                     if (resultSuccess) {
-                                        var replyText = if (isMeal)
-                                            String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered)
+                                        if (isMeal)
+                                            replyText.append(String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered))
                                         else
-                                            String.format(resourceHelper.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered)
-                                        replyText += "\n" + activePlugin.activePump.shortStatus(true)
+                                            replyText.append(String.format(resourceHelper.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered))
+                                        replyText.append("\n" + activePlugin.activePump.shortStatus(true))
                                         lastRemoteBolusTime = DateUtil.now()
-                                        if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
-                                            replyText += "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
-                                        } else {
-                                            activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo, true)
-                                            replyText += "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger)
+                                        if (!isCarbsAnotherTime.get()) {
+                                            if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
+                                                replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger))
+                                            } else {
+                                                activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo, true)
+                                                replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger))
+                                            }
                                         }
                                         if (isMeal) {
                                             profileFunction.getProfile()?.let { currentProfile ->
@@ -932,19 +940,44 @@ class SmsCommunicatorPlugin @Inject constructor(
                                                 val tt = if (currentProfile.units == Constants.MMOL) {
                                                     DecimalFormatter.to1Decimal(eatingSoonTT)
                                                 } else DecimalFormatter.to0Decimal(eatingSoonTT)
-                                                replyText += "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered_tt), tt, eatingSoonTTDuration)
+                                                "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered_tt), tt, eatingSoonTTDuration)
                                             }
                                         }
-                                        sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText))
+
                                     } else {
-                                        var replyText = resourceHelper.gs(R.string.smscommunicator_bolusfailed)
-                                        replyText += "\n" + activePlugin.activePump.shortStatus(true)
-                                        sendSMS(Sms(receivedSms.phoneNumber, replyText))
+                                        var replyTex = resourceHelper.gs(R.string.smscommunicator_bolusfailed)
+                                        replyTex += "\n" + activePlugin.activePump.shortStatus(true)
+                                        sendSMS(Sms(receivedSms.phoneNumber, replyTex))
+                                        return
                                     }
                                 }
                             })
                         }
                     })
+                    if (isCarbsAnotherTime.get()) {
+                        val detailedBolusInfo2 = DetailedBolusInfo()
+                        detailedBolusInfo2.carbs = anInteger().toDouble()
+                        detailedBolusInfo2.source = Source.USER
+                        detailedBolusInfo2.date = secondLong()
+                        if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
+                            commandQueue.bolus(detailedBolusInfo2, object : Callback() {
+                                override fun run() {
+                                    if (result.success) {
+                                        replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
+                                    } else {
+                                        var replyText2 = resourceHelper.gs(R.string.smscommunicator_carbsfailed)
+                                        replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
+                                        sendSMS(Sms(receivedSms.phoneNumber, replyText2))
+                                        return
+                                    }
+                                }
+                            })
+                        } else {
+                            activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo2, true)
+                            replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
+                        }
+                    }
+                    sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText.toString()))
                 }
             })
         }

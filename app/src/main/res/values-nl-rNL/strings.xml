@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">Tijdelijk basaal %1$.2fE/u voor %2$d minuten succesvol gestart</string>
     <string name="smscommunicator_extendedset">Vertraagde bolus %1$.2fE voor %2$d minuten succesvol gestart</string>
     <string name="smscommunicator_carbsset">Koolhydraten %1$d g succesvol ingevoerd</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Invoeren van %1$dg koolhydraten is mislukt</string>
     <string name="smscommunicator_tempbasalset_percent">Tijdelijk basaal van %1$d%% voor %2$d minuten succesvol gestart</string>
     <string name="smscommunicator_tempbasalfailed">Start tijdelijk basaal mislukt</string>

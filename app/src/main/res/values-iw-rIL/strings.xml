@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">בזאלי זמני %1$.2f יחידות/שעה למשך %2$d דקות הופעל בהצלחה</string>
     <string name="smscommunicator_extendedset">בולוס ממושך %1$.2f יחידות למשך %2$d דקות הופעל בהצלחה</string>
     <string name="smscommunicator_carbsset">%1$d גר\' פחמימות נקלטו בהצלחה</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">קליטת %1$d גר\' פחמימות נכשלה</string>
     <string name="smscommunicator_tempbasalset_percent">בזאלי זמני %1$d%% למשך %2$d דקות הופעל בהצלחה</string>
     <string name="smscommunicator_tempbasalfailed">הפעלת בזאלי זמני נכשלה</string>

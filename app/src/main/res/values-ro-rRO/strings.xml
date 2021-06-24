@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">Bazala temporară %1$.2fU/h pentru %2$d minute a fost trimisă cu succes</string>
     <string name="smscommunicator_extendedset">Bolusul extins de %1$.2fU pentru %2$d min a fost inițiat</string>
     <string name="smscommunicator_carbsset">%1$dg carbohidrați introduși cu succes</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Introducerea a %1$dg de carbohidrati a esuat</string>
     <string name="smscommunicator_tempbasalset_percent">Bazala temporară %1$d%% pentru %2$d minute a fost stabilită cu succes</string>
     <string name="smscommunicator_tempbasalfailed">Trimiterea bazalei temporare a eșuat</string>

@@ -231,6 +231,7 @@ Eversense-appen.</string>
     <string name="smscommunicator_tempbasalset">Temp basal %1$.2f enheter/tim i %2$d min startad</string>
     <string name="smscommunicator_extendedset">Förlängd bolus %1$.2f enheter över %2$d min har startats</string>
     <string name="smscommunicator_carbsset">%1$dg kolhydrater registrerat</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Misslyckades med att registrera %1$dg kolhydrater</string>
     <string name="smscommunicator_tempbasalset_percent">Temp basal %1$d%% enheter/tim i %2$d min startad</string>
     <string name="smscommunicator_tempbasalfailed">Fel vid start av temp basal</string>

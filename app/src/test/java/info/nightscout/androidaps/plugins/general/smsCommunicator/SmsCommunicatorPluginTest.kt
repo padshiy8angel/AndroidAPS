@@ -220,6 +220,7 @@ class SmsCommunicatorPluginTest : TestBaseWithProfile() {
         `when`(resourceHelper.gs(R.string.smscommunicator_calibrationsent)).thenReturn("Calibration sent. Receiving must be enabled in xDrip.")
         `when`(resourceHelper.gs(R.string.smscommunicator_carbsreplywithcode)).thenReturn("To enter %1\$dg at %2\$s reply with code %3\$s")
         `when`(resourceHelper.gs(R.string.smscommunicator_carbsset)).thenReturn("Carbs %1\$dg entered successfully")
+        `when`(resourceHelper.gs(R.string.smscommunicator_carbssetat)).thenReturn("Carbs %1\$d  g entered at %2\$s successfully")
         `when`(resourceHelper.gs(R.string.noprofile)).thenReturn("No profile loaded from NS yet")
         `when`(resourceHelper.gs(R.string.pumpsuspended)).thenReturn("Pump suspended")
         `when`(resourceHelper.gs(R.string.sms_delta)).thenReturn("Delta:")
@@ -309,6 +310,9 @@ class SmsCommunicatorPluginTest : TestBaseWithProfile() {
             smsCommunicatorPlugin.processSms(Sms("1234", passCode))
             Assert.assertEquals(passCode, smsCommunicatorPlugin.messages[2].text)
             Assert.assertTrue(smsCommunicatorPlugin.messages[3].text.contains("Bolus 1.00U delivered successfully"))
+            if (it.contains("11:45")) {
+                Assert.assertTrue(smsCommunicatorPlugin.messages[3].text.contains("Carbs 20  g entered at 11:45AM"))
+            }
         }
 
         // LOOP : test remote control disabled

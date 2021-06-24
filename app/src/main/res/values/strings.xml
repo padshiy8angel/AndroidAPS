@@ -268,6 +268,7 @@
     <string name="smscommunicator_tempbasalset">Temp basal %1$.2fU/h for %2$d min started successfully</string>
     <string name="smscommunicator_extendedset">Extended bolus %1$.2fU for %2$d min started successfully</string>
     <string name="smscommunicator_carbsset">Carbs %1$d  g entered successfully</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Entering %1$dg of carbs failed</string>
     <string name="smscommunicator_tempbasalset_percent">Temp basal %1$d%% for %2$d min started successfully</string>
     <string name="smscommunicator_tempbasalfailed">Temp basal start failed</string>

@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">Dočasný bazál %1$.2fU/h na %2$d minut spuštěn</string>
     <string name="smscommunicator_extendedset">Prodloužený bolus %1$.2fU na %2$d min úspěšně spuštěn</string>
     <string name="smscommunicator_carbsset">Sacharidy %1$d g byly úspěšně zadány</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Zadání %1$d g sacharidů se nezdařilo</string>
     <string name="smscommunicator_tempbasalset_percent">Dočasný bazál %1$d%% na %2$d minut úspěšně spuštěn</string>
     <string name="smscommunicator_tempbasalfailed">Spuštění dočasného bazálu selhalo</string>

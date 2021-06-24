@@ -228,6 +228,7 @@
     <string name="smscommunicator_tempbasalset">Basal temporal %1$.2fU/h para %2$d min iniciada correctamente</string>
     <string name="smscommunicator_extendedset">Bolo ampliado de %1$.2fU durante %2$d min se inició correctamente</string>
     <string name="smscommunicator_carbsset">Carbohidratos %1$d  g ingresados correctamente</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Error al introducir %1$dg de carbohidratos</string>
     <string name="smscommunicator_tempbasalset_percent">Basal temporal de %1$d%% durante %2$d min iniciada correctamente</string>
     <string name="smscommunicator_tempbasalfailed">Fallo inicio basal temporal</string>

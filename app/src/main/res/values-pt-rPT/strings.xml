@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">Basal temporária %1$.2fU/h para %2$d min iniciada com êxito</string>
     <string name="smscommunicator_extendedset">Bólus prolongado %1$.2fU/h para %2$d min iniciado com êxito</string>
     <string name="smscommunicator_carbsset">Hidratos %1$d  g inseridos com sucesso</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Introdução de %1$dg de hidratos falhou</string>
     <string name="smscommunicator_tempbasalset_percent">Basal temporária %1$d%% U/h durante%2$d min iniciada com êxito</string>
     <string name="smscommunicator_tempbasalfailed">Início basal temp falhou </string>

@@ -230,6 +230,7 @@
     <string name="smscommunicator_tempbasalset">Basale temporanea %1$.2fU/h per %2$d min avviata con successo</string>
     <string name="smscommunicator_extendedset">Bolo esteso %1$.2fU/h per %2$d min avviato con successo</string>
     <string name="smscommunicator_carbsset">CHO %1$d g inseriti con successo</string>
+    <string name="smscommunicator_carbssetat">Carbs %1$d  g entered at %2$s successfully</string>
     <string name="smscommunicator_carbsfailed">Inserimento di %1$dg di CHO fallito</string>
     <string name="smscommunicator_tempbasalset_percent">Basale temporanea %1$d%% per %2$d min avviata con successo</string>
     <string name="smscommunicator_tempbasalfailed">Avvio basale temporanea fallito</string>
