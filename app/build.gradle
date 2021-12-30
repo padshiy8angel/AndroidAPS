@@ -113,7 +113,7 @@ tasks.matching { it instanceof Test }.all {
 
 android {
     compileSdkVersion 28
-    ndkVersion "21.1.6352462"
+    ndkVersion "22.1.7171670"
 
     defaultConfig {
         minSdkVersion 26
@@ -320,7 +320,7 @@ printf('--------------\n')
 if (isMaster() && !gitAvailable()) {
     throw new GradleException('GIT system is not available. On Windows try to run Android Studio as an Administrator. Check if GIT is installed and Studio have permissions to use it')
 }
-if (isMaster() && !allCommitted()) {
+/* if (isMaster() && !allCommitted()) {
     throw new GradleException('There are uncommitted changes. Clone sources again as described in wiki and do not allow gradle update')
-}
+} */
 

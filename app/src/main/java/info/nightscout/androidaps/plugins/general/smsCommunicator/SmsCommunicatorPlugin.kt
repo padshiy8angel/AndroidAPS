@@ -37,6 +37,7 @@ import info.nightscout.androidaps.utils.extensions.plusAssign
 import info.nightscout.androidaps.utils.resources.ResourceHelper
 import info.nightscout.androidaps.utils.sharedPreferences.SP
 import info.nightscout.androidaps.utils.textValidator.ValidatingEditTextPreference
+import info.nightscout.androidaps.utils.wizard.BolusWizard
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.apache.commons.lang3.StringUtils
@@ -45,6 +46,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.jvm.internal.impl.protobuf.LazyStringArrayList
 
 @Singleton
 class SmsCommunicatorPlugin @Inject constructor(
@@ -216,67 +218,67 @@ class SmsCommunicatorPlugin @Inject constructor(
 
         if (splitted.isNotEmpty() && isCommand(splitted[0].toUpperCase(Locale.getDefault()), receivedSms.phoneNumber)) {
             when (splitted[0].toUpperCase(Locale.getDefault())) {
-                "BG"         ->
+                "BG"          ->
                     if (splitted.size == 1) processBG(receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "LOOP"       ->
+                "LOOP"        ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 || splitted.size == 3) processLOOP(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "TREATMENTS" ->
+                "TREATMENTS"  ->
                     if (splitted.size == 2) processTREATMENTS(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "NSCLIENT"   ->
+                "NSCLIENT"    ->
                     if (splitted.size == 2) processNSCLIENT(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "PUMP"       ->
+                "PUMP"        ->
                     if (!remoteCommandsAllowed && splitted.size > 1) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size <= 3) processPUMP(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "PROFILE"    ->
+                "PROFILE"     ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 || splitted.size == 3) processPROFILE(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "BASAL"      ->
+                "BASAL"       ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 || splitted.size == 3) processBASAL(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "EXTENDED"   ->
+                "EXTENDED"    ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 || splitted.size == 3) processEXTENDED(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "BOLUS"      ->
+                "BOLUS"       ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 && DateUtil.now() - lastRemoteBolusTime < minDistance) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotebolusnotallowed)))
                     else if (splitted.size == 2 && pump.isSuspended) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.pumpsuspended)))
                     else if (splitted.size == 2 || splitted.size == 3) processBOLUS(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "CARBS"      ->
+                "CARBS"       ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 || splitted.size == 3) processCARBS(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "BOLUS_CARBS"      ->
+                "BOLUS_CARBS" ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2 && DateUtil.now() - lastRemoteBolusTime < minDistance) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotebolusnotallowed)))
                     else if (splitted.size == 2 && pump.isSuspended) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.pumpsuspended)))
                     else if (splitted.size >= 3 || splitted.size <= 5) processBOLUS_CARBS(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "CAL"        ->
+                "CAL"         ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2) processCAL(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "TARGET"     ->
+                "TARGET"      ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2) processTARGET(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "SMS"        ->
+                "SMS"         ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2) processSMS(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                "HELP"       ->
+                "HELP"        ->
                     if (splitted.size == 1 || splitted.size == 2) processHELP(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-                else         ->
+                else          ->
                     if (messageToConfirm?.requester?.phoneNumber == receivedSms.phoneNumber) {
                         messageToConfirm?.action(splitted[0])
                         messageToConfirm = null
@@ -980,6 +982,40 @@ class SmsCommunicatorPlugin @Inject constructor(
                 }
             })
         }
+    }
+
+    /**
+     * Формат CALC <CARBS_VALUE*> <MEAL>
+     */
+    private fun processCALC(splitted: Array<String>, receivedSms: Sms) {
+        var carbs = SafeParse.stringToInt(splitted[1])
+        val carbsTime = DateUtil.now()
+        var isMeal = false;
+        val isCarbsAnotherTime = AtomicBoolean(false)
+        if (splitted.size > 1) {
+            isMeal = splitted[2].equals("MEAL", ignoreCase = true)
+        }
+
+        val tempTarget = activePlugin.activeTreatments.tempTargetFromHistory
+        val profile = profileFunction.getProfile()
+        carbs = constraintChecker.applyCarbsConstraints(Constraint(carbs)).value()
+        // COB
+        var cob = 0.0
+        val cobInfo = iobCobCalculatorPlugin.getCobInfo(false, "Wizard COB")
+        cobInfo.displayCob?.let { cob = it }
+        val actualBG = iobCobCalculatorPlugin.actualBg()!!.value
+
+        val wizard = profile?.let {
+            BolusWizard(injector).doCalc(it, profileFunction.getProfileName(), tempTarget, carbs, cob, actualBG, 0.0,
+                sp.getInt(R.string.key_boluswizard_percentage, 100).toDouble(),
+                true, false, true, true, true, true, true, false, "", carbsTime.toInt())
+        }
+        var bolus = 0.0
+        wizard?.let { wizard ->
+            bolus = wizard.calculatedTotalInsulin
+        }
+        val newArray = arrayOf ( bolus.toString(), carbs.toString(), if (isMeal) "MEAL" else "" )
+        processBOLUS_CARBS(newArray, receivedSms)
     }
 
     private fun processTARGET(splitted: Array<String>, receivedSms: Sms) {
