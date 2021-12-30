@@ -263,6 +263,12 @@ class SmsCommunicatorPlugin @Inject constructor(
                     else if (splitted.size == 2 && pump.isSuspended) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.pumpsuspended)))
                     else if (splitted.size >= 3 || splitted.size <= 5) processBOLUS_CARBS(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
+                "CALC" ->
+                    if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
+                    else if (splitted.size == 2 && DateUtil.now() - lastRemoteBolusTime < minDistance) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotebolusnotallowed)))
+                    else if (splitted.size == 2 && pump.isSuspended) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.pumpsuspended)))
+                    else if (splitted.isNotEmpty() || splitted.size <= 2) processCALC(splitted, receivedSms)
+                    else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
                 "CAL"         ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
                     else if (splitted.size == 2) processCAL(splitted, receivedSms)
@@ -991,7 +997,6 @@ class SmsCommunicatorPlugin @Inject constructor(
         var carbs = SafeParse.stringToInt(splitted[1])
         val carbsTime = DateUtil.now()
         var isMeal = false;
-        val isCarbsAnotherTime = AtomicBoolean(false)
         if (splitted.size > 1) {
             isMeal = splitted[2].equals("MEAL", ignoreCase = true)
         }
