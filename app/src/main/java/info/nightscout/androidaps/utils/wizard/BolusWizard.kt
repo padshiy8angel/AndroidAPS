@@ -153,23 +153,43 @@ class BolusWizard @Inject constructor(
     ): BolusWizard {
 
         this.profile = profile
+        aapsLogger.debug("BOLUS_WIZARD: profile - $profile")
         this.profileName = profileName
+        aapsLogger.debug("BOLUS_WIZARD: profileName - $profileName")
         this.tempTarget = tempTarget
+        aapsLogger.debug("BOLUS_WIZARD: tempTarget - ${tempTarget?.low} - ${tempTarget?.high}")
         this.carbs = carbs
+        aapsLogger.debug("BOLUS_WIZARD: carbs - $carbs")
         this.cob = cob
+        aapsLogger.debug("BOLUS_WIZARD: cob - $cob")
         this.bg = bg
+        aapsLogger.debug("BOLUS_WIZARD: bg - $bg")
         this.correction = correction
+        aapsLogger.debug("BOLUS_WIZARD: correction - $correction")
         this.percentageCorrection = percentageCorrection
+        aapsLogger.debug("BOLUS_WIZARD: percentageCorrection - $percentageCorrection")
         this.useBg = useBg
+        aapsLogger.debug("BOLUS_WIZARD: useBg - $useBg")
         this.useCob = useCob
+        aapsLogger.debug("BOLUS_WIZARD: useCob - $useCob")
         this.includeBolusIOB = includeBolusIOB
+        aapsLogger.debug("BOLUS_WIZARD: includeBolusIOB - $includeBolusIOB")
         this.includeBasalIOB = includeBasalIOB
+        aapsLogger.debug("BOLUS_WIZARD: profile - $includeBasalIOB")
         this.useSuperBolus = useSuperBolus
+        aapsLogger.debug("BOLUS_WIZARD: profile - $useSuperBolus")
         this.useTT = useTT
+        aapsLogger.debug("BOLUS_WIZARD: useTT - $useTT")
         this.useTrend = useTrend
+        aapsLogger.debug("BOLUS_WIZARD: profile - $useTrend")
         this.useAlarm = useAlarm
+        aapsLogger.debug("BOLUS_WIZARD: profile - $useAlarm")
         this.notes = notes
+        aapsLogger.debug("BOLUS_WIZARD: profile - $notes")
         this.carbTime = carbTime
+        aapsLogger.debug("BOLUS_WIZARD: profile - $carbTime")
+
+
 
         // Insulin from BG
         sens = Profile.fromMgdlToUnits(profile.isfMgdl, profileFunction.getUnits())
@@ -224,6 +244,8 @@ class BolusWizard @Inject constructor(
         }
 
         // Total
+        aapsLogger.debug("BOLUS_WIZARD: calculatedTotalInsulin = insulinFromBG + insulinFromTrend + insulinFromCarbs + insulinFromBolusIOB + insulinFromBasalIOB + insulinFromCorrection + insulinFromSuperBolus + insulinFromCOB")
+        aapsLogger.debug("BOLUS_WIZARD: $calculatedTotalInsulin = $insulinFromBG + $insulinFromTrend + $insulinFromCarbs + $insulinFromBolusIOB + $insulinFromBasalIOB + $insulinFromCorrection + $insulinFromSuperBolus + $insulinFromCOB")
         calculatedTotalInsulin = insulinFromBG + insulinFromTrend + insulinFromCarbs + insulinFromBolusIOB + insulinFromBasalIOB + insulinFromCorrection + insulinFromSuperBolus + insulinFromCOB
 
         // Percentage adjustment

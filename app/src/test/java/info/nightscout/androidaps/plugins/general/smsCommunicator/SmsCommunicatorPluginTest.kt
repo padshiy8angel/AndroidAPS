@@ -182,7 +182,6 @@ class SmsCommunicatorPluginTest : TestBaseWithProfile() {
         `when`(resourceHelper.gs(R.string.smscommunicator_stopsmswithcode)).thenReturn("To disable the SMS Remote Service reply with code %1\$s.\\n\\nKeep in mind that you\\'ll able to reactivate it directly from the AAPS master smartphone only.")
         `when`(resourceHelper.gs(R.string.smscommunicator_mealbolusreplywithcode)).thenReturn("To deliver meal bolus %1$.2fU reply with code %2\$s.")
         `when`(resourceHelper.gs(R.string.smscommunicator_boluscarbsreplywithcode)).thenReturn("To deliver bolus %1$.2fU and enter %2\$dg at %3\$s reply with code %4\$s.")
-        `when`(resourceHelper.gs(R.string.smscommunicator_boluscarbsmealreplywithcode)).thenReturn("To deliver meal bolus %1\$.2fU and enter %2\$dg at %3\$s reply with code %4\$s.")
         `when`(resourceHelper.gs(R.string.smscommunicator_temptargetwithcode)).thenReturn("To set the Temp Target %1\$s reply with code %2\$s")
         `when`(resourceHelper.gs(R.string.smscommunicator_temptargetcancel)).thenReturn("To cancel Temp Target reply with code %1\$s")
         `when`(resourceHelper.gs(R.string.smscommunicator_stoppedsms)).thenReturn("SMS Remote Service stopped. To reactivate it, use AAPS on master smartphone.")
@@ -313,6 +312,23 @@ class SmsCommunicatorPluginTest : TestBaseWithProfile() {
             if (it.contains("11:45")) {
                 Assert.assertTrue(smsCommunicatorPlugin.messages[3].text.contains("Carbs 20  g entered at 11:45AM"))
             }
+        }
+
+        //Calc
+        `when`(sp.getBoolean(R.string.key_smscommunicator_remotecommandsallowed, false)).thenReturn(true)
+        val smsTypesCalc = listOf("CALC 20",
+            "CALC 20 meal")
+        `when`(constraintChecker.applyBolusConstraints(anyObject())).thenReturn(Constraint<Double>(1.0))
+        `when`(constraintChecker.applyCarbsConstraints(anyObject())).thenReturn(Constraint<Int>(20))
+        smsTypesCalc.forEach {
+            smsCommunicatorPlugin.messages = ArrayList()
+            sms = Sms("1234", it)
+            smsCommunicatorPlugin.processSms(sms)
+            Assert.assertTrue(smsCommunicatorPlugin.messages[1].text.contains("bolus 1.00U and enter 20g"))
+            val passCode: String = smsCommunicatorPlugin.messageToConfirm?.confirmCode!!
+            smsCommunicatorPlugin.processSms(Sms("1234", passCode))
+            Assert.assertEquals(passCode, smsCommunicatorPlugin.messages[2].text)
+            Assert.assertTrue(smsCommunicatorPlugin.messages[3].text.contains("Bolus 1.00U delivered successfully"))
         }
 
         // LOOP : test remote control disabled

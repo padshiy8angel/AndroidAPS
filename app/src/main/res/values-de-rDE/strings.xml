@@ -184,9 +184,9 @@
     <string name="smscommunicator_allowednumbers_summary">+XXXXXXXXXX;+YYYYYYYYYY</string>
     <string name="smscommunicator_bolusreplywithcode">Um einen Bolus von %1$.2f IE abzugeben, antworte mit dem Code %2$s.</string>
     <string name="smscommunicator_mealbolusreplywithcode">Um einen Mahlzeitenbolus von %1$.2f IE abzugeben, antworte mit  dem Code %2$s.</string>
-    <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
-    <string name="smscommunicator_boluscarbsmealreplywithcode">To deliver meal bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
-    <string name="smscommunicator_temptargetwithcode">Um ein temporäres Ziel von %1$s zu setzen, antworte mit dem Code %2$s</string>
+    <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s%4$s%5$s reply with code %6$s</string>
+    <string name="smscommunicator_boluscarbsmeal">, and set target meal </string>
+    <string name="smscommunicator_fatprotein">, and enter %1$dg at %2$s (%3$dg fats and %4$dg proteins) </string><string name="smscommunicator_temptargetwithcode">Um ein temporäres Ziel von %1$s zu setzen, antworte mit dem Code %2$s</string>
     <string name="smscommunicator_temptargetcancel">Um das temporäre Ziel zu stoppen, antworte mit dem Code %1$s</string>
     <string name="smscommunicator_stopsmswithcode">Um die SMS-Fernsteuerung zu deaktivieren, antworte mit dem Code %1$s\n\nBeachte, dass Du diesen nur am AAPS-Master-Smartphone wieder aktivieren kannst.</string>
     <string name="smscommunicator_stoppedsms">SMS-Fernsteuerung gestoppt. Verwende das AAPS-Master-Smartphone, um sie wieder zu aktivieren.</string>
