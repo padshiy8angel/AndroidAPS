@@ -162,6 +162,7 @@
     <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
     <string name="smscommunicator_boluscarbsmealreplywithcode">To deliver meal bolus %1$.2fU and enter %2$dg at %3$s reply with code %4$s</string>
     <string name="smscommunicator_temptargetwithcode">임시목표 %1$s를 설정하려면 %2$s를 입력하고 답장하세요</string>
+    <string name="smscommunicator_temptargetdigital">%1$.2f for %2$d minutes</string>
     <string name="smscommunicator_temptargetcancel">임시목표를 취소하려면 %1$s를 입력하고 답장하세요</string>
     <string name="smscommunicator_stopsmswithcode">SMS 원격 기능을 비활성화려면 %1$s를 입력하고 답장하세요.\n\nAAPS 마스터폰을 통해서만 다시 활성화할 수 있습니다.</string>
     <string name="smscommunicator_stoppedsms">SMS 원격 기능이 중지되었습니다. 다시 활성화하려면 AAPS 마스터폰을 이용하세요.</string>

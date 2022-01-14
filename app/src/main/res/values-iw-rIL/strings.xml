@@ -186,7 +186,9 @@
     <string name="smscommunicator_mealbolusreplywithcode">למתן %1$.2f יחידות בולוס ארוחה יש להשיב עם הקוד %2$s</string>
     <string name="smscommunicator_boluscarbsreplywithcode">To deliver bolus %1$.2fU and enter %2$dg at %3$s%4$s%5$s reply with code %6$s</string>
     <string name="smscommunicator_boluscarbsmeal">, and set target meal </string>
-    <string name="smscommunicator_fatprotein">, and enter %1$dg at %2$s (%3$dg fats and %4$dg proteins) </string><string name="smscommunicator_temptargetwithcode">להגדרת המטרה הזמנית %1$s יש להשיב עם הקוד %2$s</string>
+    <string name="smscommunicator_fatprotein">, and enter %1$dg at %2$s (%3$dg fats and %4$dg proteins) </string>
+    <string name="smscommunicator_temptargetwithcode">להגדרת המטרה הזמנית %1$s יש להשיב עם הקוד %2$s</string>
+    <string name="smscommunicator_temptargetdigital">%1$.2f for %2$d minutes</string>
     <string name="smscommunicator_temptargetcancel">לביטול המטרה הזמנית יש להשיב עם הקוד %1$s</string>
     <string name="smscommunicator_stopsmswithcode">לביטול שירות השליטה מרחוק באמצעות SMS השיבו עם הקוד %1$s. \n\nהשירות ניתן להפעלה מחדש ממכשיר ה-AAPS הראשי בלבד.</string>
     <string name="smscommunicator_stoppedsms">שירות השליטה מרחוק באמצעות SMS מופסק. על מנת להפעילו, השתמשו בAAPS במכשיר הראשי.</string>

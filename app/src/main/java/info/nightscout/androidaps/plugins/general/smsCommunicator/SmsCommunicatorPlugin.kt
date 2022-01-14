@@ -92,11 +92,11 @@ class SmsCommunicatorPlugin @Inject constructor(
         "BASAL" to "BASAL STOP/CANCEL\nBASAL 0.3\nBASAL 0.3 20\nBASAL 30%\nBASAL 30% 20\n",
         "BOLUS" to "BOLUS 1.2\nBOLUS 1.2 MEAL",
         "BOLUS_CARBS" to "BOLUS_CARBS 1.2 20\nBOLUS_CARBS 1.2 20 11:45\nBOLUS_CARBS 1.2 20 meal\nBOLUS_CARBS 1.2 20 11:45 meal",
-        "CALC" to "CALC 20\nCALC 20 meal",
+        "CALC" to "CALC 20\nCALC 20 meal\nCALC 20 meal f_10 p_10 d_10",
         "EXTENDED" to "EXTENDED STOP/CANCEL\nEXTENDED 2 120",
         "CAL" to "CAL 5.6",
         "PROFILE" to "PROFILE STATUS/LIST\nPROFILE 1\nPROFILE 2 30",
-        "TARGET" to "TARGET MEAL/ACTIVITY/HYPO/STOP",
+        "TARGET" to "TARGET MEAL/ACTIVITY/HYPO/STOP\nTARGET t_8.5\nTARGET t_8.5 d_120",
         "SMS" to "SMS DISABLE/STOP",
         "CARBS" to "CARBS 12\nCARBS 12 23:05\nCARBS 12 11:05PM",
         "HELP" to "HELP\nHELP command"
@@ -276,7 +276,7 @@ class SmsCommunicatorPlugin @Inject constructor(
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
                 "TARGET"      ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
-                    else if (splitted.size == 2) processTARGET(splitted, receivedSms)
+                    else if (splitted.size in 2..3) processTARGET(splitted, receivedSms)
                     else sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
                 "SMS"         ->
                     if (!remoteCommandsAllowed) sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.smscommunicator_remotecommandnotallowed)))
@@ -895,141 +895,137 @@ class SmsCommunicatorPlugin @Inject constructor(
         }
         bolus = constraintChecker.applyBolusConstraints(Constraint(bolus)).value()
         carbs = constraintChecker.applyCarbsConstraints(Constraint(carbs)).value()
-        if (carbs == 0 || bolus <= 0.0) {
-            sendSMS(Sms(receivedSms.phoneNumber, resourceHelper.gs(R.string.wrongformat)))
-        } else {
-            val passCode = generatePasscode()
-            val fatProteinDelayTime = carbsTime + fpDelay * 60 * 1000
-            val fatProteinCarbs = (fats * 0.4 + proteins * 0.5).toInt()
-            val meal = if (isMeal)
-                resourceHelper.gs(R.string.smscommunicator_boluscarbsmeal)
-            else
-                ""
-            val fatProtein = if (fats > 0 || proteins > 0)
-                String.format(resourceHelper.gs(R.string.smscommunicator_fatprotein, fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime), fats, proteins))
-            else
-                ""
-            val reply =
-                String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsreplywithcode), bolus, carbs, dateUtil.timeString(carbsTime), meal, fatProtein, passCode)
+        val passCode = generatePasscode()
+        val fatProteinDelayTime = carbsTime + fpDelay * 60 * 1000
+        val fatProteinCarbs = (fats * 0.4 + proteins * 0.5).toInt()
+        val meal = if (isMeal)
+            resourceHelper.gs(R.string.smscommunicator_boluscarbsmeal)
+        else
+            ""
+        val fatProtein = if (fats > 0 || proteins > 0)
+            String.format(resourceHelper.gs(R.string.smscommunicator_fatprotein, fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime), fats, proteins))
+        else
+            ""
+        val reply =
+            String.format(resourceHelper.gs(R.string.smscommunicator_boluscarbsreplywithcode), bolus, carbs, dateUtil.timeString(carbsTime), meal, fatProtein, passCode)
 
-            receivedSms.processed = true
-            messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction(bolus, carbs, carbsTime) {
-                override fun run() {
-                    aapsLogger.debug("USER ENTRY: SMS BOLUS_CARBS $reply")
-                    val detailedBolusInfo = DetailedBolusInfo()
-                    detailedBolusInfo.insulin = aDouble()
-                    if (!isCarbsAnotherTime.get()) {
-                        detailedBolusInfo.carbs = anInteger().toDouble()
-                        detailedBolusInfo.date = secondLong()
-                    }
-                    detailedBolusInfo.source = Source.USER
-                    val replyText = StringBuilder()
-                    commandQueue.bolus(detailedBolusInfo, object : Callback() {
-                        override fun run() {
-                            val resultSuccess = result.success
-                            val resultBolusDelivered = result.bolusDelivered
-                            commandQueue.readStatus("SMS", object : Callback() {
-                                override fun run() {
-                                    if (resultSuccess) {
-                                        if (isMeal)
-                                            replyText.append(String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered))
-                                        else
-                                            replyText.append(String.format(resourceHelper.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered))
-                                        replyText.append("\n" + activePlugin.activePump.shortStatus(true))
-                                        lastRemoteBolusTime = DateUtil.now()
-                                        if (!isCarbsAnotherTime.get()) {
-                                            if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
-                                                replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger))
-                                            } else {
-                                                activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo, true)
-                                                replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger))
-                                            }
-                                        }
-                                        if (isMeal) {
-                                            profileFunction.getProfile()?.let { currentProfile ->
-                                                var eatingSoonTTDuration = sp.getInt(R.string.key_eatingsoon_duration, Constants.defaultEatingSoonTTDuration)
-                                                eatingSoonTTDuration =
-                                                    if (eatingSoonTTDuration > 0) eatingSoonTTDuration
-                                                    else Constants.defaultEatingSoonTTDuration
-                                                var eatingSoonTT = sp.getDouble(R.string.key_eatingsoon_target, if (currentProfile.units == Constants.MMOL) Constants.defaultEatingSoonTTmmol else Constants.defaultEatingSoonTTmgdl)
-                                                eatingSoonTT =
-                                                    if (eatingSoonTT > 0) eatingSoonTT
-                                                    else if (currentProfile.units == Constants.MMOL) Constants.defaultEatingSoonTTmmol
-                                                    else Constants.defaultEatingSoonTTmgdl
-                                                val tempTarget = TempTarget()
-                                                    .date(System.currentTimeMillis())
-                                                    .duration(eatingSoonTTDuration)
-                                                    .reason(resourceHelper.gs(R.string.eatingsoon))
-                                                    .source(Source.USER)
-                                                    .low(Profile.toMgdl(eatingSoonTT, currentProfile.units))
-                                                    .high(Profile.toMgdl(eatingSoonTT, currentProfile.units))
-                                                activePlugin.activeTreatments.addToHistoryTempTarget(tempTarget)
-                                                val tt = if (currentProfile.units == Constants.MMOL) {
-                                                    DecimalFormatter.to1Decimal(eatingSoonTT)
-                                                } else DecimalFormatter.to0Decimal(eatingSoonTT)
-                                                "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered_tt), tt, eatingSoonTTDuration)
-                                            }
-                                        }
-                                        if (isCarbsAnotherTime.get()) {
-                                            val detailedBolusInfo2 = DetailedBolusInfo()
-                                            detailedBolusInfo2.carbs = anInteger().toDouble()
-                                            detailedBolusInfo2.source = Source.USER
-                                            detailedBolusInfo2.date = secondLong()
-                                            if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
-                                                commandQueue.bolus(detailedBolusInfo2, object : Callback() {
-                                                    override fun run() {
-                                                        if (result.success) {
-                                                            replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
-                                                        } else {
-                                                            var replyText2 = resourceHelper.gs(R.string.smscommunicator_carbsfailed)
-                                                            replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
-                                                            sendSMS(Sms(receivedSms.phoneNumber, replyText2))
-                                                            return
-                                                        }
-                                                    }
-                                                })
-                                            } else {
-                                                activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo2, true)
-                                                replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
-                                            }
-                                        }
-                                        if (fatProteinCarbs > 0) {
-                                            val detailedBolusInfo2 = DetailedBolusInfo()
-                                            detailedBolusInfo2.carbs = fatProteinCarbs.toDouble()
-                                            detailedBolusInfo2.source = Source.USER
-                                            detailedBolusInfo2.date = fatProteinDelayTime
-                                            if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
-                                                commandQueue.bolus(detailedBolusInfo2, object : Callback() {
-                                                    override fun run() {
-                                                        if (result.success) {
-                                                            replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime)))
-                                                        } else {
-                                                            var replyText2 = resourceHelper.gs(R.string.smscommunicator_carbsfailed)
-                                                            replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
-                                                            sendSMS(Sms(receivedSms.phoneNumber, replyText2))
-                                                            return
-                                                        }
-                                                    }
-                                                })
-                                            } else {
-                                                activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo2, true)
-                                                replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime)))
-                                            }
-                                        }
-                                        sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText.toString()))
-                                    } else {
-                                        var replyTex = resourceHelper.gs(R.string.smscommunicator_bolusfailed)
-                                        replyTex += "\n" + activePlugin.activePump.shortStatus(true)
-                                        sendSMS(Sms(receivedSms.phoneNumber, replyTex))
-                                        return
-                                    }
-                                }
-                            })
-                        }
-                    })
+        receivedSms.processed = true
+        messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction(bolus, carbs, carbsTime) {
+            override fun run() {
+                aapsLogger.debug("USER ENTRY: SMS BOLUS_CARBS $reply")
+                val detailedBolusInfo = DetailedBolusInfo()
+                detailedBolusInfo.insulin = aDouble()
+                if (!isCarbsAnotherTime.get()) {
+                    detailedBolusInfo.carbs = anInteger().toDouble()
+                    detailedBolusInfo.date = secondLong()
                 }
-            })
-        }
+                detailedBolusInfo.source = Source.USER
+                val replyText = StringBuilder()
+                commandQueue.bolus(detailedBolusInfo, object : Callback() {
+                    override fun run() {
+                        val resultSuccess = result.success
+                        val resultBolusDelivered = result.bolusDelivered
+                        commandQueue.readStatus("SMS", object : Callback() {
+                            override fun run() {
+                                if (resultSuccess) {
+                                    if (isMeal)
+                                        replyText.append(String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered))
+                                    else
+                                        replyText.append(String.format(resourceHelper.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered))
+                                    replyText.append("\n" + activePlugin.activePump.shortStatus(true))
+                                    lastRemoteBolusTime = DateUtil.now()
+                                    if (!isCarbsAnotherTime.get()) {
+                                        if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
+                                            replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger))
+                                        } else {
+                                            activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo, true)
+                                            replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbsset), anInteger))
+                                        }
+                                    }
+                                    if (isMeal) {
+                                        profileFunction.getProfile()?.let { currentProfile ->
+                                            var eatingSoonTTDuration = sp.getInt(R.string.key_eatingsoon_duration, Constants.defaultEatingSoonTTDuration)
+                                            eatingSoonTTDuration =
+                                                if (eatingSoonTTDuration > 0) eatingSoonTTDuration
+                                                else Constants.defaultEatingSoonTTDuration
+                                            var eatingSoonTT = sp.getDouble(R.string.key_eatingsoon_target, if (currentProfile.units == Constants.MMOL) Constants.defaultEatingSoonTTmmol else Constants.defaultEatingSoonTTmgdl)
+                                            eatingSoonTT =
+                                                if (eatingSoonTT > 0) eatingSoonTT
+                                                else if (currentProfile.units == Constants.MMOL) Constants.defaultEatingSoonTTmmol
+                                                else Constants.defaultEatingSoonTTmgdl
+                                            val tempTarget = TempTarget()
+                                                .date(System.currentTimeMillis())
+                                                .duration(eatingSoonTTDuration)
+                                                .reason(resourceHelper.gs(R.string.eatingsoon))
+                                                .source(Source.USER)
+                                                .low(Profile.toMgdl(eatingSoonTT, currentProfile.units))
+                                                .high(Profile.toMgdl(eatingSoonTT, currentProfile.units))
+                                            activePlugin.activeTreatments.addToHistoryTempTarget(tempTarget)
+                                            val tt = if (currentProfile.units == Constants.MMOL) {
+                                                DecimalFormatter.to1Decimal(eatingSoonTT)
+                                            } else DecimalFormatter.to0Decimal(eatingSoonTT)
+                                            "\n" + String.format(resourceHelper.gs(R.string.smscommunicator_mealbolusdelivered_tt), tt, eatingSoonTTDuration)
+                                        }
+                                    }
+                                    if (isCarbsAnotherTime.get()) {
+                                        val detailedBolusInfo2 = DetailedBolusInfo()
+                                        detailedBolusInfo2.carbs = anInteger().toDouble()
+                                        detailedBolusInfo2.source = Source.USER
+                                        detailedBolusInfo2.date = secondLong()
+                                        if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
+                                            commandQueue.bolus(detailedBolusInfo2, object : Callback() {
+                                                override fun run() {
+                                                    if (result.success) {
+                                                        replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
+                                                    } else {
+                                                        var replyText2 = resourceHelper.gs(R.string.smscommunicator_carbsfailed)
+                                                        replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
+                                                        sendSMS(Sms(receivedSms.phoneNumber, replyText2))
+                                                        return
+                                                    }
+                                                }
+                                            })
+                                        } else {
+                                            activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo2, true)
+                                            replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
+                                        }
+                                    }
+                                    if (fatProteinCarbs > 0) {
+                                        val detailedBolusInfo2 = DetailedBolusInfo()
+                                        detailedBolusInfo2.carbs = fatProteinCarbs.toDouble()
+                                        detailedBolusInfo2.source = Source.USER
+                                        detailedBolusInfo2.date = fatProteinDelayTime
+                                        if (activePlugin.activePump.pumpDescription.storesCarbInfo) {
+                                            commandQueue.bolus(detailedBolusInfo2, object : Callback() {
+                                                override fun run() {
+                                                    if (result.success) {
+                                                        replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime)))
+                                                    } else {
+                                                        var replyText2 = resourceHelper.gs(R.string.smscommunicator_carbsfailed)
+                                                        replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
+                                                        sendSMS(Sms(receivedSms.phoneNumber, replyText2))
+                                                        return
+                                                    }
+                                                }
+                                            })
+                                        } else {
+                                            activePlugin.activeTreatments.addToHistoryTreatment(detailedBolusInfo2, true)
+                                            replyText.append("\n").append(String.format(resourceHelper.gs(R.string.smscommunicator_carbssetat), fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime)))
+                                        }
+                                    }
+                                    sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText.toString()))
+                                } else {
+                                    var replyTex = resourceHelper.gs(R.string.smscommunicator_bolusfailed)
+                                    replyTex += "\n" + activePlugin.activePump.shortStatus(true)
+                                    sendSMS(Sms(receivedSms.phoneNumber, replyTex))
+                                    return
+                                }
+                            }
+                        })
+                    }
+                })
+            }
+        })
     }
 
     /**
@@ -1094,9 +1090,25 @@ class SmsCommunicatorPlugin @Inject constructor(
         val isActivity = splitted[1].equals("ACTIVITY", ignoreCase = true)
         val isHypo = splitted[1].equals("HYPO", ignoreCase = true)
         val isStop = splitted[1].equals("STOP", ignoreCase = true) || splitted[1].equals("CANCEL", ignoreCase = true)
-        if (isMeal || isActivity || isHypo) {
+        var ttValue = -1.0
+        var ttDur = 60
+        splitted.forEach { value ->
+            run {
+                if (value.startsWith("t_")) {
+                    ttValue = SafeParse.stringToDouble(value.split("_")[1])
+                } else if (value.startsWith(("d_"))) {
+                    ttDur = SafeParse.stringToInt(value.split("_")[1])
+                }
+            }
+        }
+        val isTTValue = (ttValue > 0.0 && ttDur > 0)
+        if (isMeal || isActivity || isHypo || isTTValue) {
             val passCode = generatePasscode()
-            val reply = String.format(resourceHelper.gs(R.string.smscommunicator_temptargetwithcode), splitted[1].toUpperCase(Locale.getDefault()), passCode)
+            val tempTargetText = if (isTTValue)
+                String.format(resourceHelper.gs(R.string.smscommunicator_temptargetdigital), ttValue, ttDur)
+            else
+                splitted[1].toUpperCase(Locale.getDefault())
+            val reply = String.format(resourceHelper.gs(R.string.smscommunicator_temptargetwithcode), tempTargetText, passCode)
             receivedSms.processed = true
             messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction() {
                 override fun run() {
@@ -1132,11 +1144,22 @@ class SmsCommunicatorPlugin @Inject constructor(
                             defaultTargetMGDL = Constants.defaultHypoTTmgdl
                         }
                     }
-                    var ttDuration = sp.getInt(keyDuration, defaultTargetDuration)
-                    ttDuration = if (ttDuration > 0) ttDuration else defaultTargetDuration
-                    var tt = sp.getDouble(keyTarget, if (units == Constants.MMOL) defaultTargetMMOL else defaultTargetMGDL)
-                    tt = Profile.toCurrentUnits(profileFunction, tt)
-                    tt = if (tt > 0) tt else if (units == Constants.MMOL) defaultTargetMMOL else defaultTargetMGDL
+
+                    var ttDuration = 0
+                    ttDuration = if (isTTValue) {
+                        ttDur
+                    } else {
+                        sp.getInt(keyDuration, defaultTargetDuration)
+                        if (ttDuration > 0) ttDuration else defaultTargetDuration
+                    }
+                    var tt = 0.0
+                    if (isTTValue) {
+                        tt = ttValue
+                    } else {
+                        sp.getDouble(keyTarget, if (units == Constants.MMOL) defaultTargetMMOL else defaultTargetMGDL)
+                        tt = Profile.toCurrentUnits(profileFunction, tt)
+                        tt = if (tt > 0) tt else if (units == Constants.MMOL) defaultTargetMMOL else defaultTargetMGDL
+                    }
                     val tempTarget = TempTarget()
                         .date(System.currentTimeMillis())
                         .duration(ttDuration)

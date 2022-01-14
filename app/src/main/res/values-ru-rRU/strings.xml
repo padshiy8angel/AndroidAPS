@@ -188,6 +188,7 @@
     <string name="smscommunicator_boluscarbsmeal">, и установить цель "Ожидаемый прием пищи" </string>
     <string name="smscommunicator_fatprotein">, и ввести %1$dg в %2$s (%3$dg жиров and %4$dg белков) </string>
     <string name="smscommunicator_temptargetwithcode">Чтобы установить временную цель %1$s ответьте кодом %2$s</string>
+    <string name="smscommunicator_temptargetdigital">%1$.2f на %2$d минут(-ы)</string>
     <string name="smscommunicator_temptargetcancel">Чтобы отменить временную цель ответьте кодом %1$s</string>
     <string name="smscommunicator_stopsmswithcode">Чтобы отключить службу удаленных SMS-сообщений ответьте кодом %1$s.\n\n Имейте в виду, что вы сможете вновь активировать ее только с основного телефона AAPS.</string>
     <string name="smscommunicator_stoppedsms">Удаленная служба SMS остановлена. Для ее реактивации используйте AAPS на главном смартфоне.</string>
