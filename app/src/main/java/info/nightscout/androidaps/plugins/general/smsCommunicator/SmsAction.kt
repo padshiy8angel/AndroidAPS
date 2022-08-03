@@ -36,6 +36,12 @@ abstract class SmsAction(val pumpCommand: Boolean) : Runnable {
         this.secondLong = secondLong
     }
 
+    internal constructor(pumpCommand: Boolean, aDouble: Double, anInteger: Int, secondLong: Long) : this(pumpCommand) {
+        this.aDouble = aDouble
+        this.anInteger = anInteger
+        this.secondLong = secondLong
+    }
+
     fun aDouble(): Double {
         return aDouble?.let {
             aDouble
