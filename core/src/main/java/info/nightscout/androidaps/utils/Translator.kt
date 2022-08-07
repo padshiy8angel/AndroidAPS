@@ -18,6 +18,7 @@ class Translator @Inject internal constructor(
 
     fun translate(action: Action): String = when (action) {
         Action.BOLUS                           -> rh.gs(R.string.uel_bolus)
+        Action.BOLUS_CARBS                     -> rh.gs(R.string.uel_bolus_carbs)
         Action.BOLUS_CALCULATOR_RESULT         -> rh.gs(R.string.uel_bolus_calculator)
         Action.BOLUS_CALCULATOR_RESULT_REMOVED -> rh.gs(R.string.uel_bolus_calculator)
         Action.SMB                             -> rh.gs(R.string.smb_shortname)

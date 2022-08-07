@@ -966,7 +966,7 @@ class SmsCommunicatorPlugin @Inject constructor(
         var fats = 0
         var proteins = 0
         var fpDelay = 60
-        val isCarbsAnotherTime = AtomicBoolean(false)
+        val isCarbsAnotherTime = AtomicBoolean(true)
         if (splitted.size > 3) {
             splitted.forEach {
                 run {
@@ -1009,25 +1009,60 @@ class SmsCommunicatorPlugin @Inject constructor(
         messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction(pumpCommand = true, bolus, carbs, carbsTime) {
             override fun run() {
                 aapsLogger.debug("USER ENTRY: SMS BOLUS_CARBS $reply")
+                val replyText = StringBuilder()
+                if (isCarbsAnotherTime.get()) {
+                    val detailedBolusInfo2 = DetailedBolusInfo()
+                    detailedBolusInfo2.carbs = anInteger().toDouble()
+                    detailedBolusInfo2.timestamp = secondLong()
+                    commandQueue.bolus(detailedBolusInfo2, object : Callback() {
+                        override fun run() {
+                            if (result.success) {
+                                replyText.append(String.format(rh.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
+                            } else {
+                                var replyText2 = rh.gs(R.string.smscommunicator_carbsfailed)
+                                //replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
+                                sendSMS(Sms(receivedSms.phoneNumber, replyText2))
+                                return
+                            }
+                        }
+                    })
+                }
+                if (fatProteinCarbs > 0) {
+                    val detailedBolusInfo2 = DetailedBolusInfo()
+                    detailedBolusInfo2.carbs = fatProteinCarbs.toDouble()
+                    detailedBolusInfo2.timestamp = fatProteinDelayTime
+                    commandQueue.bolus(detailedBolusInfo2, object : Callback() {
+                        override fun run() {
+                            if (result.success) {
+                                replyText.append("\n")
+                                    .append(String.format(rh.gs(R.string.smscommunicator_carbssetat), fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime)))
+                            } else {
+                                var replyText2 = rh.gs(R.string.smscommunicator_carbsfailed)
+                                //replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
+                                sendSMS(Sms(receivedSms.phoneNumber, replyText2))
+                                return
+                            }
+                        }
+                    })
+                }
                 val detailedBolusInfo = DetailedBolusInfo()
                 detailedBolusInfo.insulin = aDouble()
                 if (!isCarbsAnotherTime.get()) {
                     detailedBolusInfo.carbs = anInteger().toDouble()
                     detailedBolusInfo.timestamp = secondLong()
                 }
-                val replyText = StringBuilder()
                 commandQueue.bolus(detailedBolusInfo, object : Callback() {
                     override fun run() {
                         val resultSuccess = result.success
                         val resultBolusDelivered = result.bolusDelivered
-                        commandQueue.readStatus("SMS", object : Callback() {
+                        commandQueue.readStatus(rh.gs(R.string.sms), object : Callback() {
                             override fun run() {
                                 if (resultSuccess) {
                                     if (isMeal)
-                                        replyText.append(String.format(rh.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered))
+                                        replyText.append("\n").append(String.format(rh.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered))
                                     else
-                                        replyText.append(String.format(rh.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered))
-                                    replyText.append("\n" + activePlugin.activePump.shortStatus(true))
+                                        replyText.append("\n").append(String.format(rh.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered))
+                                    //replyText.append("\n" + activePlugin.activePump.shortStatus(true))
                                     lastRemoteBolusTime = dateUtil.now()
                                     if (!isCarbsAnotherTime.get()) {
                                         replyText.append("\n").append(String.format(rh.gs(R.string.smscommunicator_carbsset), anInteger))
@@ -1069,44 +1104,8 @@ class SmsCommunicatorPlugin @Inject constructor(
                                             replyText.append("\n" + rh.gs(R.string.smscommunicator_mealbolusdelivered_tt, tt, eatingSoonTTDuration))
                                         }
                                     }
-                                    if (isCarbsAnotherTime.get()) {
-                                        val detailedBolusInfo2 = DetailedBolusInfo()
-                                        detailedBolusInfo2.carbs = anInteger().toDouble()
-                                        detailedBolusInfo2.timestamp = secondLong()
-                                        commandQueue.bolus(detailedBolusInfo2, object : Callback() {
-                                            override fun run() {
-                                                if (result.success) {
-                                                    replyText.append("\n").append(String.format(rh.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
-                                                } else {
-                                                    var replyText2 = rh.gs(R.string.smscommunicator_carbsfailed)
-                                                    replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
-                                                    sendSMS(Sms(receivedSms.phoneNumber, replyText2))
-                                                    return
-                                                }
-                                            }
-                                        })
-
-                                    }
-                                    if (fatProteinCarbs > 0) {
-                                        val detailedBolusInfo2 = DetailedBolusInfo()
-                                        detailedBolusInfo2.carbs = fatProteinCarbs.toDouble()
-                                        detailedBolusInfo2.timestamp = fatProteinDelayTime
-                                        commandQueue.bolus(detailedBolusInfo2, object : Callback() {
-                                            override fun run() {
-                                                if (result.success) {
-                                                    replyText.append("\n")
-                                                        .append(String.format(rh.gs(R.string.smscommunicator_carbssetat), fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime)))
-                                                } else {
-                                                    var replyText2 = rh.gs(R.string.smscommunicator_carbsfailed)
-                                                    replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
-                                                    sendSMS(Sms(receivedSms.phoneNumber, replyText2))
-                                                    return
-                                                }
-                                            }
-                                        })
-
-                                    }
                                     sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText.toString()))
+                                    uel.log(Action.BOLUS_CARBS, Sources.SMS, replyText.toString())
                                 } else {
                                     var replyTex = rh.gs(R.string.smscommunicator_bolusfailed)
                                     replyTex += "\n" + activePlugin.activePump.shortStatus(true)

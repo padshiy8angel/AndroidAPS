@@ -25,6 +25,7 @@ data class UserEntry(
 ) : DBEntry, DBEntryWithTime {
     enum class Action (val colorGroup: ColorGroup) {
         BOLUS (ColorGroup.InsulinTreatment),
+        BOLUS_CARBS (ColorGroup.InsulinTreatment),
         BOLUS_CALCULATOR_RESULT (ColorGroup.InsulinTreatment),
         BOLUS_CALCULATOR_RESULT_REMOVED (ColorGroup.Aaps),
         SMB (ColorGroup.InsulinTreatment),
