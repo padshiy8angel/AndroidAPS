@@ -52,7 +52,9 @@ class XdripSourcePlugin @Inject constructor(
     private var advancedFiltering = false
     override var sensorBatteryLevel = -1
 
-    override fun advancedFilteringSupported(): Boolean = advancedFiltering
+    override fun advancedFilteringSupported(): Boolean {
+        return true
+    }
 
     private fun detectSource(glucoseValue: GlucoseValue) {
         advancedFiltering = arrayOf(
@@ -62,7 +64,8 @@ class XdripSourcePlugin @Inject constructor(
             GlucoseValue.SourceSensor.DEXCOM_G6_NATIVE_XDRIP,
             GlucoseValue.SourceSensor.DEXCOM_G5_NATIVE_XDRIP,
             GlucoseValue.SourceSensor.DEXCOM_G6_G5_NATIVE_XDRIP,
-            GlucoseValue.SourceSensor.DEXCOM_G7_NATIVE_XDRIP
+            GlucoseValue.SourceSensor.DEXCOM_G7_NATIVE_XDRIP,
+            GlucoseValue.SourceSensor.LIBRE_2_NATIVE
         ).any { it == glucoseValue.sourceSensor }
     }
 

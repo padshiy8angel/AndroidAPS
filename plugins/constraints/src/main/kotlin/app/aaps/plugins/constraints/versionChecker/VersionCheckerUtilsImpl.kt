@@ -47,7 +47,7 @@ class VersionCheckerUtilsImpl @Inject constructor(
     }
 
     private fun checkVersion() =
-        if (isConnected()) {
+        if (isConnected()) {/*
             Thread {
                 try {
                     val definition: String = URL("https://raw.githubusercontent.com/nightscout/AndroidAPS/versions/definition.json").readText()
@@ -67,7 +67,7 @@ class VersionCheckerUtilsImpl @Inject constructor(
                 } catch (e: IOException) {
                     aapsLogger.error(LTag.CORE, "Github master version check error: $e")
                 }
-            }.start()
+            }.start()*/
         } else
             aapsLogger.debug(LTag.CORE, "Github master version not checked. No connectivity")
 

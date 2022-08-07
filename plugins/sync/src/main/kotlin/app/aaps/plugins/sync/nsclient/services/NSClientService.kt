@@ -171,6 +171,14 @@ class NSClientService : DaggerService() {
                            restart()
                        }, fabricPrivacy::logException)
         disposable += rxBus
+            .toObservable(EventNSClientRestartFull::class.java)
+            .observeOn(aapsSchedulers.io)
+            .subscribe({
+                           latestDateInReceivedData = 0
+                           nsClientPlugin.pause(false)
+                           resend("FULL_RESTART")
+                       }, fabricPrivacy::logException)
+        disposable += rxBus
             .toObservable(NSAuthAck::class.java)
             .observeOn(aapsSchedulers.io)
             .subscribe({ ack -> processAuthAck(ack) }, fabricPrivacy::logException)

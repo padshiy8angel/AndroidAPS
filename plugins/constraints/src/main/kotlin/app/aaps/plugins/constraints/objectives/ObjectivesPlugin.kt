@@ -18,6 +18,7 @@ import app.aaps.core.interfaces.plugin.PluginDescription
 import app.aaps.core.interfaces.plugin.PluginType
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.sharedPreferences.SP
+import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.plugins.constraints.R
 import app.aaps.plugins.constraints.objectives.objectives.Objective
 import app.aaps.plugins.constraints.objectives.objectives.Objective0
@@ -42,6 +43,7 @@ class ObjectivesPlugin @Inject constructor(
     rh: ResourceHelper,
     private val activePlugin: ActivePlugin,
     private val sp: SP,
+    private val dateUtil: DateUtil,
     config: Config
 ) : PluginBase(
     PluginDescription()
@@ -78,6 +80,24 @@ class ObjectivesPlugin @Inject constructor(
         objectives.add(Objective10(injector))
         objectives.add(Objective11(injector))
         // edit companion object if you remove/add Objective
+        compliteAll()
+    }
+
+    private fun compliteAll() {
+        for (objective in objectives) {
+            objective.startedOn = dateUtil.now()
+            objective.accomplishedOn = dateUtil.now()
+        }
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectives_bg_is_available_in_ns, true)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectives_pump_status_is_available_in_ns, true)
+        sp.putInt(app.aaps.core.utils.R.string.key_ObjectivesmanualEnacts, 20)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectiveuseprofileswitch, true)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectiveusedisconnect, true)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectiveusereconnect, true)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectiveusetemptarget, true)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectiveuseactions, true)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectiveuseloop, true)
+        sp.putBoolean(app.aaps.core.utils.R.string.key_objectiveusescale, true)
     }
 
     fun reset() {

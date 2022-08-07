@@ -20,6 +20,7 @@ class TranslatorImpl @Inject internal constructor(
         Action.BOLUS                           -> rh.gs(app.aaps.core.ui.R.string.uel_bolus)
         Action.BOLUS_CALCULATOR_RESULT         -> rh.gs(app.aaps.core.ui.R.string.uel_bolus_calculator)
         Action.BOLUS_CALCULATOR_RESULT_REMOVED -> rh.gs(app.aaps.core.ui.R.string.uel_bolus_calculator)
+        Action.BOLUS_CARBS                     -> rh.gs(app.aaps.core.ui.R.string.uel_bolus_carbs)
         Action.SMB                             -> rh.gs(app.aaps.core.ui.R.string.smb_shortname)
         Action.BOLUS_ADVISOR                   -> rh.gs(app.aaps.core.ui.R.string.uel_bolus_advisor)
         Action.EXTENDED_BOLUS                  -> rh.gs(app.aaps.core.ui.R.string.uel_extended_bolus)
