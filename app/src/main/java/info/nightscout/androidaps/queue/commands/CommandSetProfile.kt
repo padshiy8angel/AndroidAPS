@@ -36,12 +36,13 @@ class CommandSetProfile constructor(
         val r = activePlugin.activePump.setNewBasalProfile(profile)
         aapsLogger.debug(LTag.PUMPQUEUE, "Result success: ${r.success} enacted: ${r.enacted} profile: $profile")
         callback?.result(r)?.run()
+        aapsLogger.debug(LTag.PUMPCOMM, "***1*** Send sms basal from here")
         // Send SMS notification if ProfileSwitch is coming from NS
-        val profileSwitch = repository.getEffectiveProfileSwitchActiveAt(dateUtil.now()).blockingGet()
+        /* val profileSwitch = repository.getEffectiveProfileSwitchActiveAt(dateUtil.now()).blockingGet()
         if (profileSwitch is ValueWrapper.Existing && r.enacted && hasNsId && !config.NSCLIENT) {
             if (smsCommunicatorPlugin.isEnabled())
                 smsCommunicatorPlugin.sendNotificationToAllNumbers(rh.gs(R.string.profile_set_ok))
-        }
+        }*/
     }
 
     override fun status(): String = rh.gs(R.string.set_profile)

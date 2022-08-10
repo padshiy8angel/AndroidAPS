@@ -1006,10 +1006,10 @@ class SmsCommunicatorPlugin @Inject constructor(
             String.format(rh.gs(R.string.smscommunicator_boluscarbsreplywithcode), bolus, carbs, dateUtil.timeString(carbsTime), meal, fatProtein, passCode)
 
         receivedSms.processed = true
-        messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction(pumpCommand = true, bolus, carbs, carbsTime) {
+        messageToConfirm = AuthRequest(injector, receivedSms, reply, passCode, object : SmsAction(pumpCommand = true, bolus, carbs, carbsTime, fats, proteins) {
             override fun run() {
                 aapsLogger.debug("USER ENTRY: SMS BOLUS_CARBS $reply")
-                val replyText = StringBuilder()
+                val replyMap = HashMap<Int, String>()
                 if (isCarbsAnotherTime.get()) {
                     val detailedBolusInfo2 = DetailedBolusInfo()
                     detailedBolusInfo2.carbs = anInteger().toDouble()
@@ -1017,7 +1017,7 @@ class SmsCommunicatorPlugin @Inject constructor(
                     commandQueue.bolus(detailedBolusInfo2, object : Callback() {
                         override fun run() {
                             if (result.success) {
-                                replyText.append(String.format(rh.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime)))
+                                replyMap[2] = String.format(rh.gs(R.string.smscommunicator_carbssetat), anInteger, dateUtil.timeString(carbsTime))
                             } else {
                                 var replyText2 = rh.gs(R.string.smscommunicator_carbsfailed)
                                 //replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
@@ -1034,8 +1034,7 @@ class SmsCommunicatorPlugin @Inject constructor(
                     commandQueue.bolus(detailedBolusInfo2, object : Callback() {
                         override fun run() {
                             if (result.success) {
-                                replyText.append("\n")
-                                    .append(String.format(rh.gs(R.string.smscommunicator_carbssetat), fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime)))
+                                replyMap[3] = String.format(rh.gs(R.string.smscommunicator_carbsfatproteinssetat), fatProteinCarbs, fats, proteins, dateUtil.timeString(fatProteinDelayTime))
                             } else {
                                 var replyText2 = rh.gs(R.string.smscommunicator_carbsfailed)
                                 //replyText2 += "\n" + activePlugin.activePump.shortStatus(true)
@@ -1059,14 +1058,10 @@ class SmsCommunicatorPlugin @Inject constructor(
                             override fun run() {
                                 if (resultSuccess) {
                                     if (isMeal)
-                                        replyText.append("\n").append(String.format(rh.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered))
+                                        replyMap[1] = String.format(rh.gs(R.string.smscommunicator_mealbolusdelivered), resultBolusDelivered)
                                     else
-                                        replyText.append("\n").append(String.format(rh.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered))
-                                    //replyText.append("\n" + activePlugin.activePump.shortStatus(true))
+                                        replyMap[1] = String.format(rh.gs(R.string.smscommunicator_bolusdelivered), resultBolusDelivered)
                                     lastRemoteBolusTime = dateUtil.now()
-                                    if (!isCarbsAnotherTime.get()) {
-                                        replyText.append("\n").append(String.format(rh.gs(R.string.smscommunicator_carbsset), anInteger))
-                                    }
                                     if (isMeal) {
                                         profileFunction.getProfile()?.let { currentProfile ->
                                             var eatingSoonTTDuration = sp.getInt(R.string.key_eatingsoon_duration, Constants.defaultEatingSoonTTDuration)
@@ -1101,8 +1096,12 @@ class SmsCommunicatorPlugin @Inject constructor(
                                             val tt = if (currentProfile.units == GlucoseUnit.MMOL) {
                                                 DecimalFormatter.to1Decimal(eatingSoonTT)
                                             } else DecimalFormatter.to0Decimal(eatingSoonTT)
-                                            replyText.append("\n" + rh.gs(R.string.smscommunicator_mealbolusdelivered_tt, tt, eatingSoonTTDuration))
+                                            replyMap[4] = rh.gs(R.string.smscommunicator_mealbolusdelivered_tt, tt, eatingSoonTTDuration)
                                         }
+                                    }
+                                    val replyText = StringBuilder()
+                                    replyMap.toSortedMap().forEach { (key, value) ->
+                                        replyText.appendLine(value)
                                     }
                                     sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText.toString()))
                                     uel.log(Action.BOLUS_CARBS, Sources.SMS, replyText.toString())

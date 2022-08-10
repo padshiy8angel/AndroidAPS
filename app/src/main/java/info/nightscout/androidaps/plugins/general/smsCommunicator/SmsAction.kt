@@ -7,6 +7,8 @@ abstract class SmsAction(val pumpCommand: Boolean) : Runnable {
     var secondInteger: Int? = null
     var secondLong: Long? = null
     var aString: String? = null
+    var fats: Int? = null
+    var proteins: Int? = null
 
     internal constructor(pumpCommand: Boolean, aDouble: Double) : this(pumpCommand) {
         this.aDouble = aDouble
@@ -40,6 +42,14 @@ abstract class SmsAction(val pumpCommand: Boolean) : Runnable {
         this.aDouble = aDouble
         this.anInteger = anInteger
         this.secondLong = secondLong
+    }
+
+    internal constructor(pumpCommand: Boolean, aDouble: Double, anInteger: Int, secondLong: Long, fats: Int, proteins: Int) : this(pumpCommand) {
+        this.aDouble = aDouble
+        this.anInteger = anInteger
+        this.secondLong = secondLong
+        this.fats = fats
+        this.proteins = proteins
     }
 
     fun aDouble(): Double {
