@@ -896,7 +896,7 @@ class SmsCommunicatorPlugin @Inject constructor(
                                             rh.gs(R.string.smscommunicator_mealbolusdelivered, resultBolusDelivered)
                                         else
                                             rh.gs(R.string.smscommunicator_bolusdelivered, resultBolusDelivered)
-                                        replyText += "\n" + activePlugin.activePump.shortStatus(true)
+                                        //replyText += "\n" + activePlugin.activePump.shortStatus(true)
                                         lastRemoteBolusTime = dateUtil.now()
                                         if (isMeal) {
                                             profileFunction.getProfile()?.let { currentProfile ->
@@ -1231,8 +1231,8 @@ class SmsCommunicatorPlugin @Inject constructor(
                     commandQueue.bolus(detailedBolusInfo, object : Callback() {
                         override fun run() {
                             if (result.success) {
-                                var replyText = rh.gs(R.string.smscommunicator_carbsset, anInteger)
-                                replyText += "\n" + activePlugin.activePump.shortStatus(true)
+                                var replyText = rh.gs(R.string.smscommunicator_carbssetat, anInteger, dateUtil.timeString(secondLong()))
+                                //replyText += "\n" + activePlugin.activePump.shortStatus(true)
                                 sendSMSToAllNumbers(Sms(receivedSms.phoneNumber, replyText))
                                 uel.log(
                                     Action.CARBS, Sources.SMS, activePlugin.activePump.shortStatus(true) + ": " + rh.gs(R.string.smscommunicator_carbsset, anInteger),
