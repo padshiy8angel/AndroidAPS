@@ -1001,7 +1001,7 @@ class SmsCommunicatorPlugin @Inject constructor(
             rh.gs(R.string.smscommunicator_boluscarbsmeal)
         else
             ""
-        val fatProtein = if (fats > 0 || proteins > 0)
+        val fatProtein = if (fats > 0 || proteins > 0 || fatProteinCarbs > 0)
             String.format(rh.gs(R.string.smscommunicator_fatprotein, fatProteinCarbs, dateUtil.timeString(fatProteinDelayTime), fats, proteins))
         else
             ""
