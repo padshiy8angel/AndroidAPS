@@ -966,6 +966,7 @@ class SmsCommunicatorPlugin @Inject constructor(
         var fats = 0
         var proteins = 0
         var fpDelay = 60
+        var carbsDelayed = 0
         val isCarbsAnotherTime = AtomicBoolean(true)
         if (splitted.size > 3) {
             splitted.forEach {
@@ -985,6 +986,8 @@ class SmsCommunicatorPlugin @Inject constructor(
                         proteins = SafeParse.stringToInt(it.split('_')[1])
                     } else if (it.uppercase(Locale.getDefault()).startsWith("D_")) {
                         fpDelay = SafeParse.stringToInt(it.split('_')[1])
+                    } else if (it.uppercase(Locale.getDefault()).startsWith("C_")) {
+                        carbsDelayed = SafeParse.stringToInt(it.split('_')[1])
                     }
                 }
             }
@@ -993,7 +996,7 @@ class SmsCommunicatorPlugin @Inject constructor(
         carbs = constraintChecker.applyCarbsConstraints(Constraint(carbs)).value()
         val passCode = generatePassCode()
         val fatProteinDelayTime = carbsTime + fpDelay * 60 * 1000
-        val fatProteinCarbs = (fats * 0.4 + proteins * 0.5).toInt()
+        val fatProteinCarbs = (fats * 0.4 + proteins * 0.5).toInt() + carbsDelayed
         val meal = if (isMeal)
             rh.gs(R.string.smscommunicator_boluscarbsmeal)
         else
@@ -1120,7 +1123,7 @@ class SmsCommunicatorPlugin @Inject constructor(
     }
 
     /**
-     * Формат CALC <CARBS_VALUE*> <MEAL> F_<FATS> P_<PROTEINS> D_<FATS_PROTEINS_DELAY>
+     * Формат CALC <CARBS_VALUE*> <MEAL> F_<FATS> P_<PROTEINS> D_<FATS_PROTEINS_DELAY> C_<CARBS_DELAYED>
      */
     private fun processCALC(splitted: Array<String>, receivedSms: Sms) {
         aapsLogger.debug("CALC: SMS CALC $splitted")
@@ -1131,6 +1134,7 @@ class SmsCommunicatorPlugin @Inject constructor(
         var fats = 0
         var proteins = 0
         var fpDelay = 60
+        var carbsDelayed = 0
         if (splitted.size > 2) {
             splitted.forEach {
                 run {
@@ -1142,6 +1146,8 @@ class SmsCommunicatorPlugin @Inject constructor(
                         proteins = SafeParse.stringToInt(it.split('_')[1])
                     } else if (it.uppercase(Locale.getDefault()).startsWith("D_")) {
                         fpDelay = SafeParse.stringToInt(it.split('_')[1])
+                    } else if (it.uppercase(Locale.getDefault()).startsWith("C_")) {
+                        carbsDelayed = SafeParse.stringToInt(it.split('_')[1])
                     }
                 }
             }
@@ -1183,7 +1189,8 @@ class SmsCommunicatorPlugin @Inject constructor(
                                if (isMeal) "MEAL" else "",
                                if (fats > 0) "F_$fats" else "",
                                if (proteins > 0) "P_$proteins" else "",
-                               if (fats > 0 || proteins > 0) "D_$fpDelay" else "")
+                               if (fats > 0 || proteins > 0) "D_$fpDelay" else "",
+                               if (carbsDelayed > 0) "C_$carbsDelayed" else "")
         aapsLogger.debug("CALC: SMS CALC newArray - $newArray")
         processBolusCarbs(newArray, receivedSms)
     }
