@@ -1189,7 +1189,7 @@ class SmsCommunicatorPlugin @Inject constructor(
                                if (isMeal) "MEAL" else "",
                                if (fats > 0) "F_$fats" else "",
                                if (proteins > 0) "P_$proteins" else "",
-                               if (fats > 0 || proteins > 0) "D_$fpDelay" else "",
+                               if (fats > 0 || proteins > 0 || carbsDelayed > 0) "D_$fpDelay" else "",
                                if (carbsDelayed > 0) "C_$carbsDelayed" else "")
         aapsLogger.debug("CALC: SMS CALC newArray - $newArray")
         processBolusCarbs(newArray, receivedSms)
