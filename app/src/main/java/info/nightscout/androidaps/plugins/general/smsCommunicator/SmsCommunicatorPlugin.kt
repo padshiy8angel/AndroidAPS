@@ -1328,16 +1328,16 @@ class SmsCommunicatorPlugin @Inject constructor(
                         ttDur
                     } else {
                         sp.getInt(keyDuration, defaultTargetDuration)
-                        if (ttDuration > 0) ttDuration else defaultTargetDuration
                     }
+                    ttDuration = if (ttDuration > 0) ttDuration else defaultTargetDuration
                     var tt = 0.0
-                    if (isTTValue) {
-                        tt = ttValue
+                    tt = if (isTTValue) {
+                        ttValue
                     } else {
                         sp.getDouble(keyTarget, if (units == GlucoseUnit.MMOL) defaultTargetMMOL else defaultTargetMGDL)
-                        tt = Profile.toCurrentUnits(profileFunction, tt)
-                        tt = if (tt > 0) tt else if (units == GlucoseUnit.MMOL) defaultTargetMMOL else defaultTargetMGDL
                     }
+                    tt = Profile.toCurrentUnits(profileFunction, tt)
+                    tt = if (tt.compareTo(0.0) != 0) tt else if (units == GlucoseUnit.MMOL) defaultTargetMMOL else defaultTargetMGDL
                     disposable += repository.runTransactionForResult(
                         InsertAndCancelCurrentTemporaryTargetTransaction(
                             timestamp = dateUtil.now(),
