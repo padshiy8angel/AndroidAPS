@@ -46,6 +46,7 @@ import info.nightscout.androidaps.queue.Callback
 import info.nightscout.androidaps.receivers.DataWorker
 import info.nightscout.androidaps.utils.*
 import info.nightscout.androidaps.interfaces.ResourceHelper
+import info.nightscout.androidaps.plugins.general.nsclient.events.EventNSClientRestartFull
 import info.nightscout.androidaps.utils.rx.AapsSchedulers
 import info.nightscout.shared.sharedPreferences.SP
 import info.nightscout.androidaps.utils.textValidator.ValidatingEditTextPreference
@@ -500,6 +501,10 @@ class SmsCommunicatorPlugin @Inject constructor(
         if (divided[1].uppercase(Locale.getDefault()) == "RESTART") {
             rxBus.send(EventNSClientRestart())
             sendSMS(Sms(receivedSms.phoneNumber, "NSCLIENT RESTART SENT"))
+            receivedSms.processed = true
+        } else if (divided[1].uppercase(Locale.getDefault()) == "RESTART_FULL") {
+            rxBus.send(EventNSClientRestartFull())
+            sendSMS(Sms(receivedSms.phoneNumber, "NSCLIENT FULL RESTART SENT"))
             receivedSms.processed = true
         } else
             sendSMS(Sms(receivedSms.phoneNumber, rh.gs(R.string.wrongformat)))
@@ -1330,8 +1335,7 @@ class SmsCommunicatorPlugin @Inject constructor(
                         sp.getInt(keyDuration, defaultTargetDuration)
                     }
                     ttDuration = if (ttDuration > 0) ttDuration else defaultTargetDuration
-                    var tt = 0.0
-                    tt = if (isTTValue) {
+                    var tt: Double = if (isTTValue) {
                         ttValue
                     } else {
                         sp.getDouble(keyTarget, if (units == GlucoseUnit.MMOL) defaultTargetMMOL else defaultTargetMGDL)

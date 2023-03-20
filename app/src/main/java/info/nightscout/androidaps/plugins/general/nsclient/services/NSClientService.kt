@@ -34,6 +34,7 @@ import info.nightscout.androidaps.plugins.general.nsclient.data.NSDeviceStatus
 import info.nightscout.androidaps.plugins.general.nsclient.data.NSSettingsStatus
 import info.nightscout.androidaps.plugins.general.nsclient.events.EventNSClientNewLog
 import info.nightscout.androidaps.plugins.general.nsclient.events.EventNSClientRestart
+import info.nightscout.androidaps.plugins.general.nsclient.events.EventNSClientRestartFull
 import info.nightscout.androidaps.plugins.general.nsclient.events.EventNSClientStatus
 import info.nightscout.androidaps.plugins.general.nsclient.events.EventNSClientUpdateGUI
 import info.nightscout.androidaps.plugins.general.overview.events.EventDismissNotification
@@ -154,6 +155,14 @@ class NSClientService : DaggerService() {
             .subscribe({
                            latestDateInReceivedData = 0
                            restart()
+                       }, fabricPrivacy::logException)
+        disposable += rxBus
+            .toObservable(EventNSClientRestartFull::class.java)
+            .observeOn(aapsSchedulers.io)
+            .subscribe({
+                           latestDateInReceivedData = 0
+                           nsClientPlugin.pause(false)
+                           resend("FULL_RESTART")
                        }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(NSAuthAck::class.java)
