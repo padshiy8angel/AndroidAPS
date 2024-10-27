@@ -46,7 +46,7 @@ class VersionCheckerUtils @Inject constructor(
     }
 
     private fun checkVersion() =
-        if (isConnected()) {
+        if (isConnected()) {/*
             Thread {
                 try {
                     val definition: String = URL("https://raw.githubusercontent.com/nightscout/AndroidAPS/versions/definition.json").readText()
@@ -66,7 +66,7 @@ class VersionCheckerUtils @Inject constructor(
                 } catch (e: IOException) {
                     aapsLogger.error(LTag.CORE, "Github master version check error: $e")
                 }
-            }.start()
+            }.start()*/
         } else
             aapsLogger.debug(LTag.CORE, "Github master version not checked. No connectivity")
 
@@ -125,12 +125,12 @@ class VersionCheckerUtils @Inject constructor(
     }
 
     private fun onExpireDateDetected(currentVersion: String, endDate: String?) {
-        val now = dateUtil.now()
+        /* val now = dateUtil.now()
         if (now > sp.getLong(R.string.key_last_expired_versionchecker_warning, 0) + WARN_EVERY) {
             aapsLogger.debug(LTag.CORE, rh.gs(R.string.version_expire, currentVersion, endDate))
             rxBus.send(EventNewNotification(Notification(Notification.VERSION_EXPIRE, rh.gs(R.string.version_expire, currentVersion, endDate), Notification.LOW)))
             sp.putLong(R.string.key_last_expired_versionchecker_warning, now)
-        }
+        }*/
     }
 
     private fun String?.toNumberList() =
