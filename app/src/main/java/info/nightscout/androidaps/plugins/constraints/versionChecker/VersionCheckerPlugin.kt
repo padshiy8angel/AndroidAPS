@@ -68,9 +68,9 @@ class VersionCheckerPlugin @Inject constructor(
     }
 
     override fun applyMaxIOBConstraints(maxIob: Constraint<Double>): Constraint<Double> =
-        if (isOldVersion(gracePeriod.old.daysToMillis()))
+        /** if (isOldVersion(gracePeriod.old.daysToMillis()))
             maxIob.set(aapsLogger, 0.0, rh.gs(R.string.old_version), this)
-        else
+        else */
             maxIob
 
     private fun checkWarning() {
