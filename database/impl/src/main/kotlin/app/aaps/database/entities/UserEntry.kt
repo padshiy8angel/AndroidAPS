@@ -29,6 +29,7 @@ data class UserEntry(
         BOLUS,
         BOLUS_CALCULATOR_RESULT,
         BOLUS_CALCULATOR_RESULT_REMOVED,
+        BOLUS_CARBS,
         SMB,
         BOLUS_ADVISOR,
         EXTENDED_BOLUS,

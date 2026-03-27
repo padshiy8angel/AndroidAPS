@@ -8,6 +8,7 @@ fun UserEntry.Action.fromDb(): Action =
         UserEntry.Action.BOLUS                           -> Action.BOLUS
         UserEntry.Action.BOLUS_CALCULATOR_RESULT         -> Action.BOLUS_CALCULATOR_RESULT
         UserEntry.Action.BOLUS_CALCULATOR_RESULT_REMOVED -> Action.BOLUS_CALCULATOR_RESULT_REMOVED
+        UserEntry.Action.BOLUS_CARBS                     -> Action.BOLUS_CARBS
         UserEntry.Action.SMB                             -> Action.SMB
         UserEntry.Action.BOLUS_ADVISOR                   -> Action.BOLUS_ADVISOR
         UserEntry.Action.EXTENDED_BOLUS                  -> Action.EXTENDED_BOLUS
@@ -106,6 +107,7 @@ fun Action.toDb(): UserEntry.Action =
         Action.BOLUS                           -> UserEntry.Action.BOLUS
         Action.BOLUS_CALCULATOR_RESULT         -> UserEntry.Action.BOLUS_CALCULATOR_RESULT
         Action.BOLUS_CALCULATOR_RESULT_REMOVED -> UserEntry.Action.BOLUS_CALCULATOR_RESULT_REMOVED
+        Action.BOLUS_CARBS                     -> UserEntry.Action.BOLUS_CARBS
         Action.SMB                             -> UserEntry.Action.SMB
         Action.BOLUS_ADVISOR                   -> UserEntry.Action.BOLUS_ADVISOR
         Action.EXTENDED_BOLUS                  -> UserEntry.Action.EXTENDED_BOLUS
