@@ -38,7 +38,7 @@ class VersionCheckerUtilsImpl @Inject constructor(
         val newVersionByApi = compareWithCurrentVersion(newVersion = version, currentVersion = config.get().VERSION_NAME)
 
         // App expiration
-        if (newVersionByApi || config.get().isDev()) {
+        /*if (newVersionByApi || config.get().isDev()) {
             var endDate = preferences.get(LongComposedKey.AppExpiration, config.get().VERSION_NAME)
             AllowedVersions.findByVersion(definition, config.get().VERSION_NAME)?.let { dateAsString ->
                 AllowedVersions.endDateToMilliseconds(dateAsString)?.let { ed ->
@@ -47,7 +47,7 @@ class VersionCheckerUtilsImpl @Inject constructor(
                 }
             }
             if (endDate != 0L) onExpireDateDetected(config.get().VERSION_NAME, endDate)
-        }
+        }*/
 
     }
 

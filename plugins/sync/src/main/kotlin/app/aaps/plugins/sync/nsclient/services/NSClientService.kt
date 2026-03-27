@@ -25,6 +25,7 @@ import app.aaps.core.interfaces.rx.events.EventDeviceStatusChange
 import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.rx.events.EventNSClientNewLog
 import app.aaps.core.interfaces.rx.events.EventNSClientRestart
+import app.aaps.core.interfaces.rx.events.EventNSClientRestartFull
 import app.aaps.core.interfaces.rx.events.EventNewHistoryData
 import app.aaps.core.interfaces.rx.events.EventNewNotification
 import app.aaps.core.interfaces.rx.events.EventPreferenceChange
@@ -182,6 +183,14 @@ class NSClientService : DaggerService() {
             .subscribe({
                            latestDateInReceivedData = 0
                            restart()
+                       }, fabricPrivacy::logException)
+        disposable += rxBus
+            .toObservable(EventNSClientRestartFull::class.java)
+            .observeOn(aapsSchedulers.io)
+            .subscribe({
+                           latestDateInReceivedData = 0
+                           nsClientPlugin.pause(false)
+                           resend("FULL_RESTART")
                        }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(NSAuthAck::class.java)
